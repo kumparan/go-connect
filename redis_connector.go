@@ -36,7 +36,7 @@ var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
 
 // NewRedigoRedisConnectionPool uses redigo library to establish the redis connection pool
 func NewRedigoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*redigo.Pool, error) {
-	if !isValidRedisURL(url) {
+	if !isValidRedisStandaloneURL(url) {
 		return nil, errors.New("invalid redis URL: " + url)
 	}
 
@@ -80,8 +80,8 @@ func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*gor
 // NewGoRedisClusterConnectionPool uses goredis library to establish the redis cluster connection pool
 func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOptions) (*goredis.ClusterClient, error) {
 	for _, url := range urls {
-		if !isValidRedisURL(url) {
-			return nil, errors.New("invalid redis URL: " + url)
+		if isValidRedisStandaloneURL(url) {
+			return nil, errors.New("invalid redis-cluster URL: " + url)
 		}
 	}
 	options := applyRedisConnectionPoolOptions(opt)
@@ -105,7 +105,7 @@ func applyRedisConnectionPoolOptions(opt *RedisConnectionPoolOptions) *RedisConn
 	return defaultRedisConnectionPoolOptions
 }
 
-func isValidRedisURL(url string) bool {
+func isValidRedisStandaloneURL(url string) bool {
 	_, err := goredis.ParseURL(url)
 	return err == nil
 }
