@@ -5,6 +5,7 @@ import (
 
 	goredis "github.com/go-redis/redis"
 	redigo "github.com/gomodule/redigo/redis"
+	"github.com/sirupsen/logrus"
 )
 
 // RedisConnectionPoolOptions options for the redis connection
@@ -58,15 +59,19 @@ func NewRedigoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) *
 
 // NewGoRedisConnectionPool uses goredis library to establish the redis connection pool
 func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) *goredis.Client {
-	options := applyRedisConnectionPoolOptions(opt)
+	options, err := goredis.ParseURL(url)
+	if err != nil {
+		logrus.Error(err)
+		options = new(goredis.Options)
+	}
 
-	return goredis.NewClient(&goredis.Options{
-		Addr:         url,
-		MinIdleConns: options.IdleCount,
-		PoolSize:     options.PoolSize,
-		IdleTimeout:  options.IdleTimeout,
-		MaxConnAge:   options.MaxConnLifetime,
-	})
+	myOptions := applyRedisConnectionPoolOptions(opt)
+	options.MinIdleConns = myOptions.IdleCount
+	options.PoolSize = myOptions.PoolSize
+	options.IdleTimeout = myOptions.IdleTimeout
+	options.MaxConnAge = myOptions.MaxConnLifetime
+
+	return goredis.NewClient(options)
 }
 
 // NewGoRedisClusterConnectionPool uses goredis library to establish the redis cluster connection pool

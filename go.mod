@@ -7,4 +7,5 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/onsi/ginkgo v1.12.0 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect
+	github.com/sirupsen/logrus v1.4.2
 )
