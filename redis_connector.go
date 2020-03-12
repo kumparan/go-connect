@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"errors"
 	"time"
 
 	goredis "github.com/go-redis/redis"
@@ -34,7 +35,11 @@ var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
 }
 
 // NewRedigoRedisConnectionPool uses redigo library to establish the redis connection pool
-func NewRedigoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) *redigo.Pool {
+func NewRedigoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*redigo.Pool, error) {
+	if !isValidRedisURL(url) {
+		return nil, errors.New("invalid redis URL: " + url)
+	}
+
 	options := applyRedisConnectionPoolOptions(opt)
 
 	return &redigo.Pool{
@@ -53,28 +58,36 @@ func NewRedigoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) *
 			_, err := c.Do("PING")
 			return err
 		},
-	}
+	}, nil
 }
 
 // NewGoRedisConnectionPool uses goredis library to establish the redis connection pool
-func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) *goredis.Client {
-	options := applyRedisConnectionPoolOptions(opt)
+func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*goredis.Client, error) {
+	options, err := goredis.ParseURL(url)
+	if err != nil {
+		return nil, err
+	}
 
-	return goredis.NewClient(&goredis.Options{
-		Addr:         url,
-		MinIdleConns: options.IdleCount,
-		PoolSize:     options.PoolSize,
-		IdleTimeout:  options.IdleTimeout,
-		MaxConnAge:   options.MaxConnLifetime,
-	})
+	myOptions := applyRedisConnectionPoolOptions(opt)
+	options.MinIdleConns = myOptions.IdleCount
+	options.PoolSize = myOptions.PoolSize
+	options.IdleTimeout = myOptions.IdleTimeout
+	options.MaxConnAge = myOptions.MaxConnLifetime
+
+	return goredis.NewClient(options), nil
 }
 
 // NewGoRedisClusterConnectionPool uses goredis library to establish the redis cluster connection pool
-func NewGoRedisClusterConnectionPool(url []string, opt *RedisConnectionPoolOptions) *goredis.ClusterClient {
+func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOptions) (*goredis.ClusterClient, error) {
+	for _, url := range urls {
+		if !isValidRedisURL(url) {
+			return nil, errors.New("invalid redis URL: " + url)
+		}
+	}
 	options := applyRedisConnectionPoolOptions(opt)
 
 	return goredis.NewClusterClient(&goredis.ClusterOptions{
-		Addrs:        url,
+		Addrs:        urls,
 		IdleTimeout:  options.IdleTimeout,
 		MinIdleConns: options.IdleCount,
 		MaxConnAge:   options.MaxConnLifetime,
@@ -82,7 +95,7 @@ func NewGoRedisClusterConnectionPool(url []string, opt *RedisConnectionPoolOptio
 		OnConnect: func(conn *goredis.Conn) error {
 			return conn.Ping().Err()
 		},
-	})
+	}), nil
 }
 
 func applyRedisConnectionPoolOptions(opt *RedisConnectionPoolOptions) *RedisConnectionPoolOptions {
@@ -90,4 +103,9 @@ func applyRedisConnectionPoolOptions(opt *RedisConnectionPoolOptions) *RedisConn
 		return opt
 	}
 	return defaultRedisConnectionPoolOptions
+}
+
+func isValidRedisURL(url string) bool {
+	_, err := goredis.ParseURL(url)
+	return err == nil
 }
