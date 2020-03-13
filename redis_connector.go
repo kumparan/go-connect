@@ -2,6 +2,7 @@ package connect
 
 import (
 	"errors"
+	"github.com/imdario/mergo"
 	"time"
 
 	goredis "github.com/go-redis/redis/v7"
@@ -11,17 +12,17 @@ import (
 // RedisConnectionPoolOptions options for the redis connection
 type RedisConnectionPoolOptions struct {
 	// Dial timeout for establishing new connections.
-	// Default is 5 seconds.
+	// Default is 5 seconds. Only for go-redis.
 	DialTimeout time.Duration
 
 	// Timeout for socket reads. If reached, commands will fail
 	// with a timeout instead of blocking. Use value -1 for no timeout and 0 for default.
-	// Default is 3 seconds.
+	// Default is 3 seconds. Only for go-redis.
 	ReadTimeout time.Duration
 
 	// Timeout for socket writes. If reached, commands will fail
 	// with a timeout instead of blocking.
-	// Default is ReadTimeout.
+	// Default is ReadTimeout. Only for go-redis.
 	WriteTimeout time.Duration
 
 	// Number of idle connections in the pool.
@@ -122,10 +123,12 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 }
 
 func applyRedisConnectionPoolOptions(opt *RedisConnectionPoolOptions) *RedisConnectionPoolOptions {
-	if opt != nil {
-		return opt
+	if opt == nil {
+		return defaultRedisConnectionPoolOptions
 	}
-	return defaultRedisConnectionPoolOptions
+	// if error occurs, also return options from input
+	_ = mergo.Merge(opt, *defaultRedisConnectionPoolOptions)
+	return opt
 }
 
 func isValidRedisStandaloneURL(url string) bool {
