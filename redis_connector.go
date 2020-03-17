@@ -5,7 +5,7 @@ import (
 	"github.com/imdario/mergo"
 	"time"
 
-	goredis "github.com/go-redis/redis/v7"
+	goredis "github.com/go-redis/redis"
 	redigo "github.com/gomodule/redigo/redis"
 )
 
