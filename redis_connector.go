@@ -2,6 +2,7 @@ package connect
 
 import (
 	"errors"
+	"github.com/imdario/mergo"
 	"time"
 
 	goredis "github.com/go-redis/redis"
@@ -10,6 +11,20 @@ import (
 
 // RedisConnectionPoolOptions options for the redis connection
 type RedisConnectionPoolOptions struct {
+	// Dial timeout for establishing new connections.
+	// Default is 5 seconds. Only for go-redis.
+	DialTimeout time.Duration
+
+	// Timeout for socket reads. If reached, commands will fail
+	// with a timeout instead of blocking. Use value -1 for no timeout and 0 for default.
+	// Default is 3 seconds. Only for go-redis.
+	ReadTimeout time.Duration
+
+	// Timeout for socket writes. If reached, commands will fail
+	// with a timeout instead of blocking.
+	// Default is ReadTimeout. Only for go-redis.
+	WriteTimeout time.Duration
+
 	// Number of idle connections in the pool.
 	IdleCount int
 
@@ -32,6 +47,9 @@ var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
 	PoolSize:        100,
 	IdleTimeout:     60 * time.Second,
 	MaxConnLifetime: 0,
+	DialTimeout: 5 * time.Second,
+	WriteTimeout: 2 * time.Second,
+	ReadTimeout: 2 * time.Second,
 }
 
 // NewRedigoRedisConnectionPool uses redigo library to establish the redis connection pool
@@ -73,6 +91,9 @@ func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*gor
 	options.PoolSize = myOptions.PoolSize
 	options.IdleTimeout = myOptions.IdleTimeout
 	options.MaxConnAge = myOptions.MaxConnLifetime
+	options.DialTimeout = myOptions.DialTimeout
+	options.WriteTimeout = myOptions.WriteTimeout
+	options.ReadTimeout = myOptions.ReadTimeout
 
 	return goredis.NewClient(options), nil
 }
@@ -92,6 +113,9 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		MinIdleConns: options.IdleCount,
 		MaxConnAge:   options.MaxConnLifetime,
 		PoolSize:     options.PoolSize,
+		DialTimeout: options.DialTimeout,
+		WriteTimeout: options.WriteTimeout,
+		ReadTimeout: options.ReadTimeout,
 		OnConnect: func(conn *goredis.Conn) error {
 			return conn.Ping().Err()
 		},
@@ -99,10 +123,12 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 }
 
 func applyRedisConnectionPoolOptions(opt *RedisConnectionPoolOptions) *RedisConnectionPoolOptions {
-	if opt != nil {
-		return opt
+	if opt == nil {
+		return defaultRedisConnectionPoolOptions
 	}
-	return defaultRedisConnectionPoolOptions
+	// if error occurs, also return options from input
+	_ = mergo.Merge(opt, *defaultRedisConnectionPoolOptions)
+	return opt
 }
 
 func isValidRedisStandaloneURL(url string) bool {
