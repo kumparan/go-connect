@@ -51,6 +51,10 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 				err := utils.Retry(o.RetryCount, o.RetryInterval, func() error {
 					return invoker(ctx, method, req, reply, cc, opts...)
 				})
+
+				if err == nil {
+					success <- true
+				}
 				return err
 			}, nil)
 
