@@ -2,8 +2,9 @@ package connect
 
 import (
 	"errors"
-	"github.com/imdario/mergo"
 	"time"
+
+	"github.com/imdario/mergo"
 
 	goredis "github.com/go-redis/redis"
 	redigo "github.com/gomodule/redigo/redis"
@@ -40,6 +41,17 @@ type RedisConnectionPoolOptions struct {
 	// Close connections older than this duration. If the value is zero, then
 	// the pool does not close connections based on age.
 	MaxConnLifetime time.Duration
+
+	// Enables read-only commands on slave nodes.
+	ReadOnly bool
+
+	// Allows routing read-only commands to the closest master or slave node.
+	// It automatically enables ReadOnly.
+	RouteByLatency bool
+
+	// Allows routing read-only commands to the random master or slave node.
+	// It automatically enables ReadOnly.
+	RouteRandomly bool
 }
 
 var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
@@ -47,9 +59,12 @@ var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
 	PoolSize:        100,
 	IdleTimeout:     60 * time.Second,
 	MaxConnLifetime: 0,
-	DialTimeout: 5 * time.Second,
-	WriteTimeout: 2 * time.Second,
-	ReadTimeout: 2 * time.Second,
+	DialTimeout:     5 * time.Second,
+	WriteTimeout:    2 * time.Second,
+	ReadTimeout:     2 * time.Second,
+	ReadOnly:        false,
+	RouteRandomly:   false,
+	RouteByLatency:  false,
 }
 
 // NewRedigoRedisConnectionPool uses redigo library to establish the redis connection pool
@@ -113,12 +128,15 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		MinIdleConns: options.IdleCount,
 		MaxConnAge:   options.MaxConnLifetime,
 		PoolSize:     options.PoolSize,
-		DialTimeout: options.DialTimeout,
+		DialTimeout:  options.DialTimeout,
 		WriteTimeout: options.WriteTimeout,
-		ReadTimeout: options.ReadTimeout,
+		ReadTimeout:  options.ReadTimeout,
 		OnConnect: func(conn *goredis.Conn) error {
 			return conn.Ping().Err()
 		},
+		ReadOnly:       options.ReadOnly,
+		RouteByLatency: options.RouteByLatency,
+		RouteRandomly:  options.RouteRandomly,
 	}), nil
 }
 
