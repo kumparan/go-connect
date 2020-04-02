@@ -70,7 +70,7 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 
 			select {
 			case out := <-success:
-				logrus.Infof("success %v", out)
+				logrus.Debugf("success %v", out)
 			case err := <-errC:
 				logrus.Warnf("failed %s", err)
 
