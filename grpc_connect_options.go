@@ -20,7 +20,7 @@ import (
 )
 
 // NewGRPCConnection establish a new grpc connection (based on pool)
-func NewGRPCConnection(target string, poolSetting *GRPCConnectionPoolSetting, dialOptions ...grpc.DialOption) (interface{}, error) {
+func NewGRPCConnection(target string, poolSetting *GRPCConnectionPoolSetting, dialOptions ...grpc.DialOption) (*grpcpool.Pool, error) {
 	poolSetting = applyGRPCConnectionPoolSetting(poolSetting)
 	pool, err := grpcpool.New(func() (*grpc.ClientConn, error) {
 		conn, err := grpc.Dial(target, dialOptions...)
@@ -35,7 +35,7 @@ func NewGRPCConnection(target string, poolSetting *GRPCConnectionPoolSetting, di
 		logrus.Errorf("Error : %v", err)
 		return nil, err
 	}
-	return &GRPCConnectionPool{Conn: pool}, nil
+	return pool, nil
 }
 
 // GRPCConnectionPool wrapper type for pooled grpc connection
