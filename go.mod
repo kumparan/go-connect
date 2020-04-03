@@ -10,6 +10,7 @@ require (
 	github.com/kumparan/go-utils v1.3.1
 	github.com/onsi/ginkgo v1.12.0 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect
+	github.com/processout/grpc-go-pool v1.2.1
 	github.com/sirupsen/logrus v1.5.0
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.5.1
