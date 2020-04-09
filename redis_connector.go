@@ -15,6 +15,9 @@ type RedisConnectionPoolOptions struct {
 	// Default is 5 seconds. Only for go-redis.
 	DialTimeout time.Duration
 
+	// Enables read-only commands on slave nodes.
+	ReadOnly bool
+
 	// Timeout for socket reads. If reached, commands will fail
 	// with a timeout instead of blocking. Use value -1 for no timeout and 0 for default.
 	// Default is 3 seconds. Only for go-redis.
@@ -116,7 +119,7 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		DialTimeout:  options.DialTimeout,
 		WriteTimeout: options.WriteTimeout,
 		ReadTimeout:  options.ReadTimeout,
-		ReadOnly:     true,
+		ReadOnly:     options.ReadOnly,
 		OnConnect: func(conn *goredis.Conn) error {
 			return conn.Ping().Err()
 		},
