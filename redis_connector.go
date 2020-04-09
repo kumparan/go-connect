@@ -2,11 +2,11 @@ package connect
 
 import (
 	"errors"
-	"github.com/imdario/mergo"
 	"time"
 
 	goredis "github.com/go-redis/redis"
 	redigo "github.com/gomodule/redigo/redis"
+	"github.com/imdario/mergo"
 )
 
 // RedisConnectionPoolOptions options for the redis connection
@@ -47,9 +47,9 @@ var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
 	PoolSize:        100,
 	IdleTimeout:     60 * time.Second,
 	MaxConnLifetime: 0,
-	DialTimeout: 5 * time.Second,
-	WriteTimeout: 2 * time.Second,
-	ReadTimeout: 2 * time.Second,
+	DialTimeout:     5 * time.Second,
+	WriteTimeout:    2 * time.Second,
+	ReadTimeout:     2 * time.Second,
 }
 
 // NewRedigoRedisConnectionPool uses redigo library to establish the redis connection pool
@@ -113,9 +113,10 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		MinIdleConns: options.IdleCount,
 		MaxConnAge:   options.MaxConnLifetime,
 		PoolSize:     options.PoolSize,
-		DialTimeout: options.DialTimeout,
+		DialTimeout:  options.DialTimeout,
 		WriteTimeout: options.WriteTimeout,
-		ReadTimeout: options.ReadTimeout,
+		ReadTimeout:  options.ReadTimeout,
+		ReadOnly:     true,
 		OnConnect: func(conn *goredis.Conn) error {
 			return conn.Ping().Err()
 		},
