@@ -53,8 +53,8 @@ type GRPCConnectionPoolSetting struct {
 
 // defaultGRPCConnectionPoolSetting is a single connection setting
 var defaultGRPCConnectionPoolSetting = &GRPCConnectionPoolSetting{
-	MaxIdle:         1,
-	MaxActive:       1,
+	MaxIdle:         10,
+	MaxActive:       20,
 	IdleTimeout:     0,
 	MaxConnLifetime: 0,
 }
