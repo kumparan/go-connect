@@ -2,11 +2,11 @@ package connect
 
 import (
 	"errors"
-	"github.com/imdario/mergo"
 	"time"
 
 	goredis "github.com/go-redis/redis"
 	redigo "github.com/gomodule/redigo/redis"
+	"github.com/imdario/mergo"
 )
 
 // RedisConnectionPoolOptions options for the redis connection
@@ -14,6 +14,9 @@ type RedisConnectionPoolOptions struct {
 	// Dial timeout for establishing new connections.
 	// Default is 5 seconds. Only for go-redis.
 	DialTimeout time.Duration
+
+	// Enables read-only commands on slave nodes.
+	ReadOnly bool
 
 	// Timeout for socket reads. If reached, commands will fail
 	// with a timeout instead of blocking. Use value -1 for no timeout and 0 for default.
@@ -47,9 +50,9 @@ var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
 	PoolSize:        100,
 	IdleTimeout:     60 * time.Second,
 	MaxConnLifetime: 0,
-	DialTimeout: 5 * time.Second,
-	WriteTimeout: 2 * time.Second,
-	ReadTimeout: 2 * time.Second,
+	DialTimeout:     5 * time.Second,
+	WriteTimeout:    2 * time.Second,
+	ReadTimeout:     2 * time.Second,
 }
 
 // NewRedigoRedisConnectionPool uses redigo library to establish the redis connection pool
@@ -113,9 +116,10 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		MinIdleConns: options.IdleCount,
 		MaxConnAge:   options.MaxConnLifetime,
 		PoolSize:     options.PoolSize,
-		DialTimeout: options.DialTimeout,
+		DialTimeout:  options.DialTimeout,
 		WriteTimeout: options.WriteTimeout,
-		ReadTimeout: options.ReadTimeout,
+		ReadTimeout:  options.ReadTimeout,
+		ReadOnly:     options.ReadOnly,
 		OnConnect: func(conn *goredis.Conn) error {
 			return conn.Ping().Err()
 		},
