@@ -1,5 +1,21 @@
 # go-connect
 
+<a name="v1.4.2"></a>
+## [v1.4.2] - 2020-09-07
+### Fixes
+- fix double invoke ([#9](https://github.com/kumparan/go-connect/issues/9))
+
+
+<a name="v1.4.1"></a>
+## [v1.4.1] - 2020-04-20
+### New Features
+- change max idle and max active default value ([#8](https://github.com/kumparan/go-connect/issues/8))
+- add ReadOnly option in go-redis cluster ([#7](https://github.com/kumparan/go-connect/issues/7))
+
+
+<a name="v1.4.0"></a>
+## [v1.4.0] - 2020-04-06
+
 <a name="v1.3.0"></a>
 ## [v1.3.0] - 2020-04-06
 ### New Features
@@ -36,7 +52,10 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.4.2...HEAD
+[v1.4.2]: https://github.com/kumparan/go-connect/compare/v1.4.1...v1.4.2
+[v1.4.1]: https://github.com/kumparan/go-connect/compare/v1.4.0...v1.4.1
+[v1.4.0]: https://github.com/kumparan/go-connect/compare/v1.3.0...v1.4.0
 [v1.3.0]: https://github.com/kumparan/go-connect/compare/v1.2.0...v1.3.0
 [v1.2.0]: https://github.com/kumparan/go-connect/compare/v1.1.0...v1.2.0
 [v1.1.0]: https://github.com/kumparan/go-connect/compare/v1.0.2...v1.1.0
