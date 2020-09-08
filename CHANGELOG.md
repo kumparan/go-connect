@@ -1,8 +1,15 @@
 # go-connect
 
+<a name="v1.4.3"></a>
+## [v1.4.3] - 2020-09-08
+### Fixes
+- should return original error without wrapping it
+
+
 <a name="v1.4.2"></a>
 ## [v1.4.2] - 2020-09-07
 ### Fixes
+- missing nil
 - fix double invoke ([#9](https://github.com/kumparan/go-connect/issues/9))
 
 
@@ -52,7 +59,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.4.2...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.4.3...HEAD
+[v1.4.3]: https://github.com/kumparan/go-connect/compare/v1.4.2...v1.4.3
 [v1.4.2]: https://github.com/kumparan/go-connect/compare/v1.4.1...v1.4.2
 [v1.4.1]: https://github.com/kumparan/go-connect/compare/v1.4.0...v1.4.1
 [v1.4.0]: https://github.com/kumparan/go-connect/compare/v1.3.0...v1.4.0
