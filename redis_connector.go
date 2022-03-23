@@ -79,6 +79,7 @@ func NewRedigoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (
 			_, err := c.Do("PING")
 			return err
 		},
+		Wait: true, // wait for connection available when maxActive is reached
 	}, nil
 }
 
