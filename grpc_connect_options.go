@@ -5,9 +5,10 @@ import (
 	"net"
 	"time"
 
-	"github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto" // nolint:staticcheck
 	grpcpool "github.com/processout/grpc-go-pool"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
 
 	"github.com/afex/hystrix-go/hystrix"
@@ -21,6 +22,7 @@ import (
 	"github.com/kumparan/go-connect/internal"
 	"github.com/kumparan/go-utils"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/baggage"
 	otelcodes "go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
 	"go.opentelemetry.io/otel/trace"
@@ -257,7 +259,68 @@ func (o *GRPCUnaryInterceptorOptions) retryableInvoke(ctx context.Context, metho
 	})
 }
 
+// peerFromCtx returns a peer address from a context, if one exists.
+func peerFromCtx(ctx context.Context) string {
+	p, ok := peer.FromContext(ctx)
+	if !ok {
+		return ""
+	}
+	return p.Addr.String()
+}
+
 // statusCodeAttr returns status code attribute based on given gRPC code.
 func statusCodeAttr(c codes.Code) attribute.KeyValue {
 	return GRPCStatusCodeKey.Int64(int64(c))
+}
+
+// UnaryServerInterceptor wrapper with open telemetry
+func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerInterceptor {
+	return func(
+		ctx context.Context,
+		req interface{},
+		info *grpc.UnaryServerInfo,
+		handler grpc.UnaryHandler,
+	) (interface{}, error) {
+		ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
+		defer cancel()
+
+		if opts.UseOpenTelemetry {
+			requestMetadata, _ := metadata.FromIncomingContext(ctx)
+			metadataCopy := requestMetadata.Copy()
+
+			bags, spanCtx := Extract(ctx, &metadataCopy)
+			ctx = baggage.ContextWithBaggage(ctx, bags)
+
+			tracer := newConfig().TracerProvider.Tracer(
+				instrumentationName,
+			)
+
+			name, attr := spanInfo(info.FullMethod, peerFromCtx(ctx))
+			ctx, Span := tracer.Start(
+				trace.ContextWithRemoteSpanContext(ctx, spanCtx),
+				name,
+				trace.WithSpanKind(trace.SpanKindServer),
+				trace.WithAttributes(attr...),
+			)
+			defer Span.End()
+
+			messageReceived.Event(ctx, 1, req)
+
+		}
+
+		resp, err := handler(ctx, req)
+		if opts.UseOpenTelemetry {
+			if err != nil {
+				s, _ := status.FromError(err)
+				Span.SetStatus(otelcodes.Error, s.Message())
+				Span.SetAttributes(statusCodeAttr(s.Code()))
+				messageSent.Event(ctx, 1, s.Proto())
+			} else {
+				Span.SetAttributes(statusCodeAttr(codes.OK))
+				messageSent.Event(ctx, 1, resp)
+			}
+		}
+
+		return resp, err
+	}
 }
