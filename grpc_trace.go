@@ -5,6 +5,7 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/metadata"
@@ -66,4 +67,16 @@ func Inject(ctx context.Context, md *metadata.MD) {
 	c.Propagators.Inject(ctx, &metadataSupplier{
 		metadata: md,
 	})
+}
+
+// Extract returns the correlation context and span context that
+// another service encoded in the gRPC metadata object with Inject.
+// This function is meant to be used on incoming requests.
+func Extract(ctx context.Context, md *metadata.MD) (baggage.Baggage, trace.SpanContext) {
+	c := newConfig()
+	ctx = c.Propagators.Extract(ctx, &metadataSupplier{
+		metadata: md,
+	})
+
+	return baggage.FromContext(ctx), trace.SpanContextFromContext(ctx)
 }
