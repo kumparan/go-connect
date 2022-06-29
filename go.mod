@@ -6,7 +6,7 @@ require (
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
 	github.com/go-redis/redis v6.15.7+incompatible
 	github.com/gomodule/redigo v2.0.0+incompatible
-	github.com/imdario/mergo v0.3.8
+	github.com/imdario/mergo v0.3.13
 	github.com/kumparan/go-utils v1.23.0
 	github.com/processout/grpc-go-pool v1.2.1
 	github.com/sirupsen/logrus v1.8.1
@@ -35,5 +35,5 @@ require (
 	golang.org/x/sys v0.0.0-20210423082822-04245dca01da // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/genproto v0.0.0-20190819201941-24fa4b261c55 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.0 // indirect
 )
