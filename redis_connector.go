@@ -1,10 +1,11 @@
 package connect
 
 import (
+	"context"
 	"errors"
 	"time"
 
-	goredis "github.com/go-redis/redis"
+	goredis "github.com/go-redis/redis/v8"
 	redigo "github.com/gomodule/redigo/redis"
 	"github.com/imdario/mergo"
 )
@@ -121,8 +122,8 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		WriteTimeout: options.WriteTimeout,
 		ReadTimeout:  options.ReadTimeout,
 		ReadOnly:     options.ReadOnly,
-		OnConnect: func(conn *goredis.Conn) error {
-			return conn.Ping().Err()
+		OnConnect: func(ctx context.Context, conn *goredis.Conn) error {
+			return conn.Ping(ctx).Err()
 		},
 	}), nil
 }
