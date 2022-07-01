@@ -1,9 +1,19 @@
 # go-connect
 
+<a name="v1.5.2"></a>
+## [v1.5.2] - 2022-07-01
+
+<a name="v1.5.1"></a>
+## [v1.5.1] - 2022-06-29
+### Other Improvements
+- fix dependabot issue ([#13](https://github.com/kumparan/go-connect/issues/13))
+- fix dependabot issue & upgrade to go 1.18 ([#12](https://github.com/kumparan/go-connect/issues/12))
+
+
 <a name="v1.5.0"></a>
 ## [v1.5.0] - 2022-03-23
 ### New Features
-- enable wait for connection when max active connection is reached
+- enable wait for connection when max active connection is rea… ([#11](https://github.com/kumparan/go-connect/issues/11))
 
 
 <a name="v1.4.3"></a>
@@ -65,7 +75,9 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.5.2...HEAD
+[v1.5.2]: https://github.com/kumparan/go-connect/compare/v1.5.1...v1.5.2
+[v1.5.1]: https://github.com/kumparan/go-connect/compare/v1.5.0...v1.5.1
 [v1.5.0]: https://github.com/kumparan/go-connect/compare/v1.4.3...v1.5.0
 [v1.4.3]: https://github.com/kumparan/go-connect/compare/v1.4.2...v1.4.3
 [v1.4.2]: https://github.com/kumparan/go-connect/compare/v1.4.1...v1.4.2
