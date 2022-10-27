@@ -233,6 +233,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 		ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 		defer cancel()
 
+		var Span trace.Span
 		if opts.UseOpenTelemetry {
 			requestMetadata, _ := metadata.FromIncomingContext(ctx)
 			metadataCopy := requestMetadata.Copy()
@@ -245,7 +246,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 			)
 
 			name, attr := spanInfo(info.FullMethod, peerFromCtx(ctx))
-			ctx, Span := tracer.Start(
+			ctx, Span = tracer.Start(
 				trace.ContextWithRemoteSpanContext(ctx, spanCtx),
 				name,
 				trace.WithSpanKind(trace.SpanKindServer),
