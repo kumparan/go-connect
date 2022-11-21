@@ -3,6 +3,7 @@ package middleware
 import (
 	"log"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/ulule/limiter/v3"
@@ -11,6 +12,8 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/labstack/echo/v4"
 )
+
+var privateIPAddressRegex = regexp.MustCompile("(10(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$)|(192\\.168(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)|(172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)")
 
 // RedisIPRateLimiter is the redis store that implements IP Based rate limiter
 type RedisIPRateLimiter struct {
@@ -35,6 +38,9 @@ func (r RedisIPRateLimiter) Limit() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) (err error) {
 			ip := c.RealIP()
+			if privateIPAddressRegex.MatchString(ip) {
+				return next(c)
+			}
 			limiterCtx, err := r.ipLimiter.Get(c.Request().Context(), ip)
 			if err != nil {
 				log.Printf("IPRateLimit - ipRateLimiter.Get - err: %v, %s on %s", err, ip, c.Request().URL)
