@@ -1,7 +1,13 @@
 # go-connect
 
+<a name="v1.6.1"></a>
+## [v1.6.1] - 2022-11-21
+### Fixes
+- ignore private ip on rate limiter
+
+
 <a name="v1.6.0"></a>
-## [v1.6.0] - 2022-11-14
+## [v1.6.0] - 2022-11-21
 ### New Features
 - add redis ip rate limiter middleware
 
@@ -81,7 +87,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.6.1...HEAD
+[v1.6.1]: https://github.com/kumparan/go-connect/compare/v1.6.0...v1.6.1
 [v1.6.0]: https://github.com/kumparan/go-connect/compare/v1.5.2...v1.6.0
 [v1.5.2]: https://github.com/kumparan/go-connect/compare/v1.5.1...v1.5.2
 [v1.5.1]: https://github.com/kumparan/go-connect/compare/v1.5.0...v1.5.1
