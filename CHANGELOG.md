@@ -1,13 +1,9 @@
 # go-connect
 
 <a name="v1.6.0"></a>
-## [v1.6.0] - 2022-11-17
+## [v1.6.0] - 2022-11-14
 ### New Features
 - add redis ip rate limiter middleware
-
-### Other Improvements
-- add new line
-- print the IP
 
 
 <a name="v1.5.2"></a>
