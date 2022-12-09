@@ -1,11 +1,12 @@
 package middleware
 
 import (
-	"github.com/kumparan/go-utils"
 	"log"
 	"net/http"
 	"regexp"
 	"strconv"
+
+	"github.com/kumparan/go-utils"
 
 	"github.com/ulule/limiter/v3"
 	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
@@ -14,7 +15,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-var privateIPAddressRegex = regexp.MustCompile("(10(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$)|(192\\.168(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)|(172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)")
+var privateIPAddressRegex = regexp.MustCompile(`(10(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$)|(192\\.168(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)|(172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)`)
 
 // RedisIPRateLimiter is the redis store that implements IP Based rate limiter
 type RedisIPRateLimiter struct {
@@ -37,6 +38,7 @@ func NewRedisIPRateLimiter(redisClient *redis.Client, rate limiter.Rate, exclude
 	}, nil
 }
 
+// Limit limit request by IP
 func (r RedisIPRateLimiter) Limit() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) (err error) {
