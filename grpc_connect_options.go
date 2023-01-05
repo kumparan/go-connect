@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	grpcpool "github.com/processout/grpc-go-pool"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -19,65 +18,15 @@ import (
 	"github.com/kumparan/go-utils"
 )
 
-// NewGRPCConnection establish a new grpc connection (based on pool)
-func NewGRPCConnection(target string, poolSetting *GRPCConnectionPoolSetting, dialOptions ...grpc.DialOption) (*grpcpool.Pool, error) {
-	poolSetting = applyGRPCConnectionPoolSetting(poolSetting)
-	pool, err := grpcpool.New(func() (*grpc.ClientConn, error) {
-		conn, err := grpc.Dial(target, dialOptions...)
-		if err != nil {
-			logrus.Errorf("Error : %v", err)
-			return nil, err
-		}
-
-		return conn, err
-	}, poolSetting.MaxIdle, poolSetting.MaxActive, poolSetting.IdleTimeout, poolSetting.MaxConnLifetime)
+// NewUnaryGRPCConnection establish a new grpc connection
+func NewUnaryGRPCConnection(target string, dialOptions ...grpc.DialOption) (*grpc.ClientConn, error) {
+	conn, err := grpc.Dial(target, dialOptions...)
 	if err != nil {
 		logrus.Errorf("Error : %v", err)
 		return nil, err
 	}
-	return pool, nil
-}
 
-// GRPCConnectionPool wrapper type for pooled grpc connection
-type GRPCConnectionPool struct {
-	Conn *grpcpool.Pool
-}
-
-// GRPCConnectionPoolSetting if set, then treat as pooled connection
-type GRPCConnectionPoolSetting struct {
-	MaxIdle         int
-	MaxActive       int
-	IdleTimeout     time.Duration
-	MaxConnLifetime time.Duration
-}
-
-// defaultGRPCConnectionPoolSetting is a single connection setting
-var defaultGRPCConnectionPoolSetting = &GRPCConnectionPoolSetting{
-	MaxIdle:         10,
-	MaxActive:       20,
-	IdleTimeout:     0,
-	MaxConnLifetime: 0,
-}
-var defaultPooledIdleTimeout = 1 * time.Second
-var defaultPooledMaxConnLifetime = 60 * time.Minute
-
-func applyGRPCConnectionPoolSetting(opts *GRPCConnectionPoolSetting) *GRPCConnectionPoolSetting {
-	if opts == nil {
-		return defaultGRPCConnectionPoolSetting
-	}
-	// if error occurs, also return options from input
-	_ = mergo.Merge(opts, *defaultGRPCConnectionPoolSetting)
-
-	// give default for wrong setting on pooled
-	if opts.MaxActive > 1 && opts.MaxIdle > 1 {
-		if opts.MaxConnLifetime <= 0 {
-			opts.MaxConnLifetime = defaultPooledMaxConnLifetime
-		}
-		if opts.IdleTimeout <= 0 {
-			opts.IdleTimeout = defaultPooledIdleTimeout
-		}
-	}
-	return opts
+	return conn, err
 }
 
 // GRPCUnaryInterceptorOptions wrapper options for the grpc connection
