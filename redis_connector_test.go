@@ -1,8 +1,9 @@
 package connect
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_applyRedisConnectionPoolOptions(t *testing.T) {
@@ -19,10 +20,10 @@ func Test_applyRedisConnectionPoolOptions(t *testing.T) {
 		assert.EqualValues(t, defaultRedisConnectionPoolOptions.MaxConnLifetime, option.MaxConnLifetime)
 	})
 
-	t.Run("merge struct ", func(t *testing.T) {
+	t.Run("merge struct", func(t *testing.T) {
 		option := applyRedisConnectionPoolOptions(&RedisConnectionPoolOptions{
-			WriteTimeout:    50,
-			ReadTimeout: 3,
+			WriteTimeout: 50,
+			ReadTimeout:  3,
 		})
 
 		// all should set to default values except for WriteTimeout and ReadTimeout

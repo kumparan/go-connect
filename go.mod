@@ -8,7 +8,7 @@ require (
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/imdario/mergo v0.3.13
 	github.com/kumparan/go-utils v1.23.0
-	github.com/processout/grpc-go-pool v1.2.1
+	github.com/labstack/echo/v4 v4.1.11
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.1
 	github.com/ulule/limiter/v3 v3.10.0
@@ -26,7 +26,6 @@ require (
 	github.com/goodsign/monday v1.0.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/graph-gophers/graphql-go v1.4.0 // indirect
-	github.com/labstack/echo/v4 v4.1.11 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/leekchan/accounting v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
