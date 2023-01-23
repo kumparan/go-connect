@@ -11,25 +11,35 @@ type HTTPConnectionOptions struct {
 	TLSHandshakeTimeout   time.Duration
 	TLSInsecureSkipVerify bool
 	Timeout               time.Duration
+	UseOpenTelemetry      bool
 }
 
 var defaultHTTPConnectionOptions = &HTTPConnectionOptions{
 	TLSHandshakeTimeout:   5 * time.Second,
 	TLSInsecureSkipVerify: false,
 	Timeout:               200 * time.Second,
+	UseOpenTelemetry:      false,
 }
 
 // NewHTTPConnection new http client
 func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 	options := applyHTTPConnectionOptions(opt)
 
-	return &http.Client{
+	httpClient := &http.Client{
 		Timeout: options.Timeout,
 		Transport: &http.Transport{
 			TLSHandshakeTimeout: options.TLSHandshakeTimeout,
 			TLSClientConfig:     &tls.Config{InsecureSkipVerify: options.TLSInsecureSkipVerify},
 		},
 	}
+
+	if !options.UseOpenTelemetry {
+		return httpClient
+	}
+
+	httpClient.Transport = NewTransport(WithRoundTripper(httpClient.Transport))
+
+	return httpClient
 }
 
 func applyHTTPConnectionOptions(opt *HTTPConnectionOptions) *HTTPConnectionOptions {

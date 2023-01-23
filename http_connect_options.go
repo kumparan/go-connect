@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/otel/codes"
 )
 
-// Transport for tracing Elastic operations.
+// Transport for tracing HTTP operations.
 type Transport struct {
 	rt http.RoundTripper
 }
@@ -27,7 +27,7 @@ func WithRoundTripper(rt http.RoundTripper) Option {
 	}
 }
 
-// NewTransport specifies a transport that will trace Elastic
+// NewTransport specifies a transport that will trace HTTP
 // and report back via OpenTracing.
 func NewTransport(opts ...Option) *Transport {
 	t := &Transport{}
@@ -38,16 +38,14 @@ func NewTransport(opts ...Option) *Transport {
 }
 
 // RoundTrip captures the request and starts an OpenTracing span
-// for Elastic operation.
+// for HTTP operation.
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	ctx, span := otel.Tracer("Elastic").Start(req.Context(), "SearchQuery")
+	ctx, span := otel.Tracer("HTTP").Start(req.Context(), "HTTPRequest")
 	defer span.End()
 
 	// See General (https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/span-general.md)
 	// and HTTP (https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/http.md)
 	attributes := []attribute.KeyValue{
-		attribute.String("code.namespace", "github.com/olivere/elastic/v7"),
-		attribute.String("code.function", "SearchQuery"),
 		attribute.String("http.url", req.URL.Redacted()),
 		attribute.String("http.method", req.Method),
 		attribute.String("http.scheme", req.URL.Scheme),
