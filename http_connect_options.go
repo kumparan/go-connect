@@ -55,13 +55,28 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	req = req.WithContext(ctx)
-	buf, err := ioutil.ReadAll(req.Body)
-	if err == nil {
-		attributes = append(attributes, attribute.String("http.body", string(buf)))
+	body, err := req.GetBody()
+	if err != nil {
+		span.SetAttributes(
+			attributes...,
+		)
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
 	}
+	if body != nil {
+		buf, err := ioutil.ReadAll(body)
+		if err != nil {
+			span.SetAttributes(
+				attributes...,
+			)
+			span.RecordError(err)
+			span.SetStatus(codes.Error, err.Error())
+		}
+		attributes = append(attributes, attribute.String("http.body", string(buf)))
 
-	reader := ioutil.NopCloser(bytes.NewBuffer(buf))
-	req.Body = reader
+		reader := ioutil.NopCloser(bytes.NewBuffer(buf))
+		req.Body = reader
+	}
 
 	span.SetAttributes(
 		attributes...,
