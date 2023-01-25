@@ -62,7 +62,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		err    error
 		reader io.ReadCloser
 	)
-	if req.Method == "GET" {
+	if req.Body == nil {
 		goto SetAttribute
 	}
 
