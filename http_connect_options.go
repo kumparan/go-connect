@@ -2,6 +2,7 @@ package connect
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -55,29 +56,25 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	req = req.WithContext(ctx)
-	body, err := req.GetBody()
-	if err != nil {
-		span.SetAttributes(
-			attributes...,
-		)
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
+
+	var (
+		buf    []byte
+		err    error
+		reader io.ReadCloser
+	)
+	if req.Method == "GET" {
+		goto SetAttribute
 	}
-	if body != nil {
-		buf, err := ioutil.ReadAll(body)
-		if err != nil {
-			span.SetAttributes(
-				attributes...,
-			)
-			span.RecordError(err)
-			span.SetStatus(codes.Error, err.Error())
-		}
+
+	buf, err = ioutil.ReadAll(req.Body)
+	if err == nil {
 		attributes = append(attributes, attribute.String("http.body", string(buf)))
-
-		reader := ioutil.NopCloser(bytes.NewBuffer(buf))
-		req.Body = reader
 	}
 
+	reader = ioutil.NopCloser(bytes.NewBuffer(buf))
+	req.Body = reader
+
+SetAttribute:
 	span.SetAttributes(
 		attributes...,
 	)
