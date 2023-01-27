@@ -238,7 +238,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 			requestMetadata, _ := metadata.FromIncomingContext(ctx)
 			metadataCopy := requestMetadata.Copy()
 
-			bags, spanCtx := Extract(ctx, &metadataCopy)
+			bags, spanCtx := extract(ctx, &metadataCopy)
 			ctx = baggage.ContextWithBaggage(ctx, bags)
 
 			tracer := newConfig().TracerProvider.Tracer(
