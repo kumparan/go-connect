@@ -121,7 +121,7 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 			inject(ctx, &metadataCopy)
 			ctx = metadata.NewOutgoingContext(ctx, metadataCopy)
 
-			messageSent.Event(ctx, 1, req)
+			messageSent.Event(ctx, defaultMessageID, req)
 		}
 
 		if o.UseCircuitBreaker {
@@ -264,10 +264,10 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 				s, _ := status.FromError(err)
 				Span.SetStatus(otelcodes.Error, s.Message())
 				Span.SetAttributes(statusCodeAttr(s.Code()))
-				messageSent.Event(ctx, 1, s.Proto())
+				messageSent.Event(ctx, defaultMessageID, s.Proto())
 			} else {
 				Span.SetAttributes(statusCodeAttr(codes.OK))
-				messageSent.Event(ctx, 1, resp)
+				messageSent.Event(ctx, defaultMessageID, resp)
 			}
 		}
 

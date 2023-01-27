@@ -16,6 +16,8 @@ const (
 	instrumentationName = "github.com/kumparan/go-connect"
 	// grpcStatusCodeKey is convention for numeric status code of a gRPC request.
 	grpcStatusCodeKey = attribute.Key("rpc.grpc.status_code")
+	// defaultMessageID is default id for event message
+	defaultMessageID = 1
 )
 
 // config is a group of options for this instrumentation.
