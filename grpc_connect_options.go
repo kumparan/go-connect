@@ -118,7 +118,7 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 			)
 			defer Span.End()
 
-			Inject(ctx, &metadataCopy)
+			inject(ctx, &metadataCopy)
 			ctx = metadata.NewOutgoingContext(ctx, metadataCopy)
 
 			messageSent.Event(ctx, 1, req)
@@ -219,7 +219,7 @@ func peerFromCtx(ctx context.Context) string {
 
 // statusCodeAttr returns status code attribute based on given gRPC code.
 func statusCodeAttr(c codes.Code) attribute.KeyValue {
-	return GRPCStatusCodeKey.Int64(int64(c))
+	return grpcStatusCodeKey.Int64(int64(c))
 }
 
 // UnaryServerInterceptor wrapper with open telemetry

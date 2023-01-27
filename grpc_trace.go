@@ -14,8 +14,8 @@ import (
 const (
 	// instrumentationName is the name of this instrumentation package.
 	instrumentationName = "github.com/kumparan/go-connect"
-	// GRPCStatusCodeKey is convention for numeric status code of a gRPC request.
-	GRPCStatusCodeKey = attribute.Key("rpc.grpc.status_code")
+	// grpcStatusCodeKey is convention for numeric status code of a gRPC request.
+	grpcStatusCodeKey = attribute.Key("rpc.grpc.status_code")
 )
 
 // config is a group of options for this instrumentation.
@@ -59,10 +59,10 @@ func (s *metadataSupplier) Keys() []string {
 	return out
 }
 
-// Inject injects correlation context and span context into the gRPC
+// inject injects correlation context and span context into the gRPC
 // metadata object. This function is meant to be used on outgoing
 // requests.
-func Inject(ctx context.Context, md *metadata.MD) {
+func inject(ctx context.Context, md *metadata.MD) {
 	c := newConfig()
 	c.Propagators.Inject(ctx, &metadataSupplier{
 		metadata: md,
