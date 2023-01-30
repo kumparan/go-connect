@@ -10,7 +10,7 @@ require (
 	github.com/imdario/mergo v0.3.13
 	github.com/kumparan/go-utils v1.23.0
 	github.com/labstack/echo/v4 v4.1.11
-	github.com/olivere/elastic v6.2.37+incompatible
+	github.com/olivere/elastic/v7 v7.0.32
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.8.1
 	github.com/ulule/limiter/v3 v3.10.0
@@ -30,7 +30,6 @@ require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/getsentry/sentry-go v0.11.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
