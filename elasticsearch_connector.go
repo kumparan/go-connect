@@ -11,23 +11,23 @@ import (
 
 // ElasticsearchConnectionOptions options for the Elasticsearch connection
 type ElasticsearchConnectionOptions struct {
-	TLSHandshakeTimeout             time.Duration
-	TLSInsecureSkipVerify           bool
-	MaxElasticsearchIdleConnections int
-	MaxElasticsearchConnsPerHost    int
-	ElasticsearchSetSniff           bool
-	ElasticsearchSetHealthcheck     bool
-	UseOpenTelemetry                bool
+	TLSHandshakeTimeout   time.Duration
+	TLSInsecureSkipVerify bool
+	MaxIdleConnections    int
+	MaxConnsPerHost       int
+	SetSniff              bool
+	SetHealthcheck        bool
+	UseOpenTelemetry      bool
 }
 
 var defaultElasticsearchConnectionOptions = &ElasticsearchConnectionOptions{
-	TLSHandshakeTimeout:             5 * time.Second,
-	TLSInsecureSkipVerify:           false,
-	MaxElasticsearchIdleConnections: 2,
-	MaxElasticsearchConnsPerHost:    10,
-	ElasticsearchSetSniff:           false,
-	ElasticsearchSetHealthcheck:     false,
-	UseOpenTelemetry:                false,
+	TLSHandshakeTimeout:   5 * time.Second,
+	TLSInsecureSkipVerify: false,
+	MaxIdleConnections:    2,
+	MaxConnsPerHost:       10,
+	SetSniff:              false,
+	SetHealthcheck:        false,
+	UseOpenTelemetry:      false,
 }
 
 // ESInfoLogger :nodoc:
@@ -47,8 +47,8 @@ func NewElasticsearchClient(url string, httpClient *http.Client, opt *Elasticsea
 		TLSHandshakeTimeout: options.TLSHandshakeTimeout,
 		// Set true on purpose
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
-		MaxIdleConnsPerHost: options.MaxElasticsearchIdleConnections,
-		MaxConnsPerHost:     options.MaxElasticsearchConnsPerHost,
+		MaxIdleConnsPerHost: options.MaxIdleConnections,
+		MaxConnsPerHost:     options.MaxConnsPerHost,
 	}
 	httpClient.Transport = httpTranspost
 	if options.UseOpenTelemetry {
@@ -58,8 +58,8 @@ func NewElasticsearchClient(url string, httpClient *http.Client, opt *Elasticsea
 	return elastic.NewClient(
 		elastic.SetURL(url),
 		elastic.SetScheme("https"),
-		elastic.SetSniff(options.ElasticsearchSetSniff),
-		elastic.SetHealthcheck(options.ElasticsearchSetHealthcheck),
+		elastic.SetSniff(options.SetSniff),
+		elastic.SetHealthcheck(options.SetHealthcheck),
 		elastic.SetErrorLog(&ESErrorLogger{}),
 		elastic.SetInfoLog(&ESInfoLogger{}),
 		elastic.SetTraceLog(&ESTraceLogger{}),
