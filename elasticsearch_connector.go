@@ -43,13 +43,17 @@ type ESTraceLogger struct{}
 func NewElasticsearchClient(url string, httpClient *http.Client, opt *ElasticsearchConnectionOptions) (*elastic.Client, error) {
 	options := applyElasticsearchConnectionOptions(opt)
 
-	httpClient.Transport = NewTransport(WithRoundTripper(&http.Transport{
+	httpTranspost := &http.Transport{
 		TLSHandshakeTimeout: options.TLSHandshakeTimeout,
 		// Set true on purpose
 		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
 		MaxIdleConnsPerHost: options.MaxElasticsearchIdleConnections,
 		MaxConnsPerHost:     options.MaxElasticsearchConnsPerHost,
-	}))
+	}
+	httpClient.Transport = httpTranspost
+	if options.UseOpenTelemetry {
+		httpClient.Transport = NewTransport(WithRoundTripper(httpTranspost))
+	}
 
 	return elastic.NewClient(
 		elastic.SetURL(url),
