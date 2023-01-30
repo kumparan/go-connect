@@ -120,8 +120,10 @@ func openCockroachConn(dsn string, options *CockroachDBConnectionOptions) (*gorm
 		return nil, err
 	}
 
-	if err := db.Use(otelgorm.NewPlugin()); err != nil {
-		log.Fatal(err)
+	if options.UseOpenTelemetry {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	conn, err := db.DB()
