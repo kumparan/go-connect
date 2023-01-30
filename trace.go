@@ -11,24 +11,18 @@ import (
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"google.golang.org/grpc/credentials"
 )
 
 // InitTraceProvider configures an OpenTelemetry exporter and trace provider
-func InitTraceProvider(token, collectorURL, serviceName string, insecureMode bool, traceRatio float64) *sdktrace.TracerProvider {
+func InitTraceProvider(token, collectorURL, serviceName string, traceRatio float64) *sdktrace.TracerProvider {
 	headers := map[string]string{
 		"signoz-access-token": token,
-	}
-
-	secureOption := otlptracegrpc.WithTLSCredentials(credentials.NewClientTLSFromCert(nil, ""))
-	if insecureMode {
-		secureOption = otlptracegrpc.WithInsecure()
 	}
 
 	exporter, err := otlptrace.New(
 		context.Background(),
 		otlptracegrpc.NewClient(
-			secureOption,
+			otlptracegrpc.WithInsecure(),
 			otlptracegrpc.WithEndpoint(collectorURL),
 			otlptracegrpc.WithHeaders(headers),
 		),
