@@ -2,7 +2,8 @@ package connect
 
 import (
 	"context"
-	"log"
+
+	log "github.com/sirupsen/logrus"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"

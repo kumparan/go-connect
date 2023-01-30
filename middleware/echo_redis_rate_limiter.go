@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"regexp"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/kumparan/go-utils"
 
