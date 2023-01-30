@@ -10,6 +10,7 @@ require (
 	github.com/imdario/mergo v0.3.13
 	github.com/kumparan/go-utils v1.23.0
 	github.com/labstack/echo/v4 v4.1.11
+	github.com/olivere/elastic v6.2.37+incompatible
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.8.1
 	github.com/ulule/limiter/v3 v3.10.0
@@ -29,6 +30,7 @@ require (
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/fortytw2/leaktest v1.3.0 // indirect
 	github.com/getsentry/sentry-go v0.11.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
@@ -38,8 +40,10 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/graph-gophers/graphql-go v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
+	github.com/josharian/intern v1.0.0 // indirect
 	github.com/labstack/gommon v0.3.0 // indirect
 	github.com/leekchan/accounting v0.3.1 // indirect
+	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.18 // indirect
