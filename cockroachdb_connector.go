@@ -22,6 +22,7 @@ type CockroachDBConnectionOptions struct {
 	MaxIdleConns     int
 	MaxOpenConns     int
 	ConnMaxLifetime  time.Duration
+	LogLevel         string
 	UseOpenTelemetry bool
 }
 
@@ -39,12 +40,13 @@ var (
 		MaxIdleConns:     2,
 		MaxOpenConns:     5,
 		ConnMaxLifetime:  1 * time.Hour,
+		LogLevel:         "info",
 		UseOpenTelemetry: false,
 	}
 )
 
 // InitializeCockroachConn :nodoc:
-func InitializeCockroachConn(databaseDSN, logLevel string, opt *CockroachDBConnectionOptions) {
+func InitializeCockroachConn(databaseDSN string, opt *CockroachDBConnectionOptions) {
 	options := applyCockroachDBConnectionOptions(opt)
 
 	conn, err := openCockroachConn(databaseDSN, options)
@@ -59,7 +61,7 @@ func InitializeCockroachConn(databaseDSN, logLevel string, opt *CockroachDBConne
 
 	CockroachDB.Logger = NewGormCustomLogger()
 
-	switch logLevel {
+	switch options.LogLevel {
 	case "error":
 		CockroachDB.Logger = CockroachDB.Logger.LogMode(gormLogger.Error)
 	case "warn":
