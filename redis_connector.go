@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/go-redis/redis/extra/redisotel/v8"
 	goredis "github.com/go-redis/redis/v8"
 	redigo "github.com/gomodule/redigo/redis"
 	"github.com/imdario/mergo"
@@ -100,7 +101,10 @@ func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*gor
 	options.WriteTimeout = myOptions.WriteTimeout
 	options.ReadTimeout = myOptions.ReadTimeout
 
-	return goredis.NewClient(options), nil
+	client := goredis.NewClient(options)
+	client.AddHook(redisotel.NewTracingHook(redisotel.WithAttributes(peerAttr(options.Addr)...)))
+
+	return client, nil
 }
 
 // NewGoRedisClusterConnectionPool uses goredis library to establish the redis cluster connection pool
@@ -112,7 +116,7 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 	}
 	options := applyRedisConnectionPoolOptions(opt)
 
-	return goredis.NewClusterClient(&goredis.ClusterOptions{
+	client := goredis.NewClusterClient(&goredis.ClusterOptions{
 		Addrs:        urls,
 		IdleTimeout:  options.IdleTimeout,
 		MinIdleConns: options.IdleCount,
@@ -125,7 +129,10 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		OnConnect: func(ctx context.Context, conn *goredis.Conn) error {
 			return conn.Ping(ctx).Err()
 		},
-	}), nil
+	})
+	client.AddHook(redisotel.NewTracingHook())
+
+	return client, nil
 }
 
 func applyRedisConnectionPoolOptions(opt *RedisConnectionPoolOptions) *RedisConnectionPoolOptions {

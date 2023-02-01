@@ -1,5 +1,41 @@
 # go-connect
 
+<a name="v1.8.0"></a>
+## [v1.8.0] - 2023-01-31
+### Code Improvements
+- move log level into opt
+- naming
+- option otel on cockroach
+- lowerize function and const name
+- lowerize function and const name
+
+### New Features
+- create InitializeCockroachConn
+- handle opt use otel on NewElasticsearchClient
+- create NewElasticsearchClient
+- remove insecure option
+- add InitTraceProvider
+- fix panic
+- fix panic
+- rename elastic option into http option
+- add elastic connect option
+- add trace on go redis
+- add UnaryServerInterceptor
+- add UseOpenTelemetry field
+
+
+<a name="v1.7.0"></a>
+## [v1.7.0] - 2023-01-06
+### Code Improvements
+- remove grpc connection pool ([#19](https://github.com/kumparan/go-connect/issues/19))
+
+
+<a name="v1.6.2"></a>
+## [v1.6.2] - 2022-11-22
+### Fixes
+- exclude ip configuration on rate limiter
+
+
 <a name="v1.6.1"></a>
 ## [v1.6.1] - 2022-11-21
 ### Fixes
@@ -87,7 +123,10 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.8.0...HEAD
+[v1.8.0]: https://github.com/kumparan/go-connect/compare/v1.7.0...v1.8.0
+[v1.7.0]: https://github.com/kumparan/go-connect/compare/v1.6.2...v1.7.0
+[v1.6.2]: https://github.com/kumparan/go-connect/compare/v1.6.1...v1.6.2
 [v1.6.1]: https://github.com/kumparan/go-connect/compare/v1.6.0...v1.6.1
 [v1.6.0]: https://github.com/kumparan/go-connect/compare/v1.5.2...v1.6.0
 [v1.5.2]: https://github.com/kumparan/go-connect/compare/v1.5.1...v1.5.2
