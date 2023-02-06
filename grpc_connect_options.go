@@ -102,50 +102,56 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 
 		ctx = metadata.AppendToOutgoingContext(ctx, "caller", utils.MyCaller(5))
 
-		if o.UseOpenTelemetry {
-			requestMetadata, _ := metadata.FromOutgoingContext(ctx)
-			metadataCopy := requestMetadata.Copy()
-			tracer := newConfig().TracerProvider.Tracer(
-				instrumentationName,
-			)
-
-			name, attr := spanInfo(method, cc.Target())
-			ctx, Span = tracer.Start(
-				ctx,
-				name,
-				trace.WithSpanKind(trace.SpanKindClient),
-				trace.WithAttributes(attr...),
-			)
-			defer Span.End()
-
-			inject(ctx, &metadataCopy)
-			ctx = metadata.NewOutgoingContext(ctx, metadataCopy)
-
-			messageSent.Event(ctx, defaultMessageID, req)
-		}
-
-		if o.UseCircuitBreaker {
-			success := make(chan bool, 1)
-			errC := hystrix.GoC(ctx, method, func(ctx context.Context) error {
-				err := o.retryableInvoke(ctx, method, req, reply, cc, invoker, opts...)
-				if err == nil {
-					success <- true
-				}
-				return err
-			}, nil)
-
-			select {
-			case out := <-success:
-				logrus.Debugf("success %v", out)
-				return nil
-			case err := <-errC:
-				logrus.Warnf("failed %s", err)
-				return err
+		if !o.UseCircuitBreaker {
+			if o.UseOpenTelemetry {
+				ctx = startTracer(ctx, method, req, cc)
 			}
+
+			return o.retryableInvoke(ctx, method, req, reply, cc, invoker, opts...)
 		}
 
-		return o.retryableInvoke(ctx, method, req, reply, cc, invoker, opts...)
+		success := make(chan bool, 1)
+		errC := hystrix.GoC(ctx, method, func(ctx context.Context) error {
+			err := o.retryableInvoke(ctx, method, req, reply, cc, invoker, opts...)
+			if err == nil {
+				success <- true
+			}
+			return err
+		}, nil)
+
+		select {
+		case out := <-success:
+			logrus.Debugf("success %v", out)
+			return nil
+		case err := <-errC:
+			logrus.Warnf("failed %s", err)
+			return err
+		}
 	}
+}
+
+func startTracer(ctx context.Context, method string, req interface{}, cc *grpc.ClientConn) context.Context {
+	requestMetadata, _ := metadata.FromOutgoingContext(ctx)
+	metadataCopy := requestMetadata.Copy()
+	tracer := newConfig().TracerProvider.Tracer(
+		instrumentationName,
+	)
+
+	name, attr := spanInfo(method, cc.Target())
+	ctx, Span = tracer.Start(
+		ctx,
+		name,
+		trace.WithSpanKind(trace.SpanKindClient),
+		trace.WithAttributes(attr...),
+	)
+	defer Span.End()
+
+	inject(ctx, &metadataCopy)
+	ctx = metadata.NewOutgoingContext(ctx, metadataCopy)
+
+	messageSent.Event(ctx, defaultMessageID, req)
+
+	return ctx
 }
 
 func applyGRPCUnaryInterceptorOptions(opts *GRPCUnaryInterceptorOptions) *GRPCUnaryInterceptorOptions {
@@ -186,6 +192,10 @@ func peerAttr(addr string) []attribute.KeyValue {
 
 func (o *GRPCUnaryInterceptorOptions) retryableInvoke(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 	return utils.Retry(o.RetryCount, o.RetryInterval, func() error {
+		if o.UseOpenTelemetry {
+			ctx = startTracer(ctx, method, req, cc)
+		}
+
 		err := invoker(ctx, method, req, reply, cc, opts...)
 
 		if o.UseOpenTelemetry {
