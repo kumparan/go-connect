@@ -200,9 +200,9 @@ func (o *GRPCUnaryInterceptorOptions) retryableInvoke(ctx context.Context, metho
 			}
 		}
 
-		if status.Code(err) != codes.Unavailable { // stop retrying unless Unavailable
-			return utils.NewRetryStopper(err)
-		}
+		// if status.Code(err) != codes.Unavailable { // stop retrying unless Unavailable
+		// 	return utils.NewRetryStopper(err)
+		// }
 
 		return err
 	})
