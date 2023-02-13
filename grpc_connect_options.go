@@ -189,13 +189,18 @@ func (o *GRPCUnaryInterceptorOptions) retryableInvoke(ctx context.Context, metho
 		err := invoker(ctx, method, req, reply, cc, opts...)
 
 		if o.UseOpenTelemetry {
-			messageReceived.Event(ctx, 1, reply)
+			messageReceived.Event(ctx, defaultMessageID, reply)
 
-			if err != nil {
+			switch {
+			case Span == nil:
+				logrus.WithFields(logrus.Fields{
+					"context": utils.DumpIncomingContext(ctx),
+				}).Error("span is nil")
+			case err != nil:
 				s, _ := status.FromError(err)
 				Span.SetStatus(otelcodes.Error, s.Message())
 				Span.SetAttributes(statusCodeAttr(s.Code()))
-			} else {
+			default:
 				Span.SetAttributes(statusCodeAttr(codes.OK))
 			}
 		}
@@ -254,7 +259,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 			)
 			defer Span.End()
 
-			messageReceived.Event(ctx, 1, req)
+			messageReceived.Event(ctx, defaultMessageID, req)
 
 		}
 
