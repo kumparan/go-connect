@@ -5,10 +5,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/go-redis/redis/extra/redisotel/v8"
-	goredis "github.com/go-redis/redis/v8"
 	redigo "github.com/gomodule/redigo/redis"
 	"github.com/imdario/mergo"
+	"github.com/redis/go-redis/extra/redisotel/v9"
+	goredis "github.com/redis/go-redis/v9"
 )
 
 // RedisConnectionPoolOptions options for the redis connection
@@ -95,14 +95,18 @@ func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*gor
 	myOptions := applyRedisConnectionPoolOptions(opt)
 	options.MinIdleConns = myOptions.IdleCount
 	options.PoolSize = myOptions.PoolSize
-	options.IdleTimeout = myOptions.IdleTimeout
-	options.MaxConnAge = myOptions.MaxConnLifetime
+	options.ConnMaxIdleTime = myOptions.IdleTimeout
+	options.ConnMaxLifetime = myOptions.MaxConnLifetime
 	options.DialTimeout = myOptions.DialTimeout
 	options.WriteTimeout = myOptions.WriteTimeout
 	options.ReadTimeout = myOptions.ReadTimeout
 
 	client := goredis.NewClient(options)
-	client.AddHook(redisotel.NewTracingHook(redisotel.WithAttributes(peerAttr(options.Addr)...)))
+
+	// Enable tracing instrumentation.
+	if err := redisotel.InstrumentTracing(client); err != nil {
+		return nil, err
+	}
 
 	return client, nil
 }
@@ -117,20 +121,24 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 	options := applyRedisConnectionPoolOptions(opt)
 
 	client := goredis.NewClusterClient(&goredis.ClusterOptions{
-		Addrs:        urls,
-		IdleTimeout:  options.IdleTimeout,
-		MinIdleConns: options.IdleCount,
-		MaxConnAge:   options.MaxConnLifetime,
-		PoolSize:     options.PoolSize,
-		DialTimeout:  options.DialTimeout,
-		WriteTimeout: options.WriteTimeout,
-		ReadTimeout:  options.ReadTimeout,
-		ReadOnly:     options.ReadOnly,
+		Addrs:           urls,
+		ConnMaxIdleTime: options.IdleTimeout,
+		MinIdleConns:    options.IdleCount,
+		ConnMaxLifetime: options.MaxConnLifetime,
+		PoolSize:        options.PoolSize,
+		DialTimeout:     options.DialTimeout,
+		WriteTimeout:    options.WriteTimeout,
+		ReadTimeout:     options.ReadTimeout,
+		ReadOnly:        options.ReadOnly,
 		OnConnect: func(ctx context.Context, conn *goredis.Conn) error {
 			return conn.Ping(ctx).Err()
 		},
 	})
-	client.AddHook(redisotel.NewTracingHook())
+
+	// Enable tracing instrumentation.
+	if err := redisotel.InstrumentTracing(client); err != nil {
+		return nil, err
+	}
 
 	return client, nil
 }
