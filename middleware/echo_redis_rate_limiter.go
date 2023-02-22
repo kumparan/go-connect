@@ -5,15 +5,13 @@ import (
 	"regexp"
 	"strconv"
 
-	log "github.com/sirupsen/logrus"
-
+	"github.com/go-redis/redis/v8"
 	"github.com/kumparan/go-utils"
+	"github.com/labstack/echo/v4"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ulule/limiter/v3"
 	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
-
-	"github.com/go-redis/redis/v8"
-	"github.com/labstack/echo/v4"
 )
 
 var privateIPAddressRegex = regexp.MustCompile(`(10(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$)|(192\\.168(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)|(172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)`)
