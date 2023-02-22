@@ -8,7 +8,6 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/sirupsen/logrus"
@@ -41,29 +40,21 @@ func NewUnaryGRPCConnection(target string, dialOptions ...grpc.DialOption) (*grp
 type messageType attribute.KeyValue
 
 // Event adds an event of the messageType to the span associated with the
-// passed context with id and size (if message is a proto message).
+// passed context with a message id.
 func (m messageType) Event(ctx context.Context, id int, message interface{}) {
 	span := trace.SpanFromContext(ctx)
-	if p, ok := message.(proto.Message); ok {
-		span.AddEvent("message", trace.WithAttributes(
-			attribute.KeyValue(m),
-			attribute.Key("message.id").Int(id),
-			attribute.Key("message.uncompressed_size").Int(proto.Size(p)),
-		))
-	} else {
-		span.AddEvent("message", trace.WithAttributes(
-			attribute.KeyValue(m),
-			attribute.Key("message.id").Int(id),
-		))
+	if !span.IsRecording() {
+		return
 	}
+	span.AddEvent("message", trace.WithAttributes(
+		attribute.KeyValue(m),
+		attribute.Key("message.id").Int(id),
+	))
 }
 
 var (
 	messageSent     = messageType(attribute.Key("message.type").String("SENT"))
 	messageReceived = messageType(attribute.Key("message.type").String("RECEIVED"))
-
-	// Span is a component of a trace
-	Span trace.Span
 )
 
 // GRPCUnaryInterceptorOptions wrapper options for the grpc connection
@@ -101,28 +92,6 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 		defer cancel()
 
 		ctx = metadata.AppendToOutgoingContext(ctx, "caller", utils.MyCaller(5))
-
-		if o.UseOpenTelemetry {
-			requestMetadata, _ := metadata.FromOutgoingContext(ctx)
-			metadataCopy := requestMetadata.Copy()
-			tracer := newConfig().TracerProvider.Tracer(
-				instrumentationName,
-			)
-
-			name, attr := spanInfo(method, cc.Target())
-			ctx, Span = tracer.Start(
-				ctx,
-				name,
-				trace.WithSpanKind(trace.SpanKindClient),
-				trace.WithAttributes(attr...),
-			)
-			defer Span.End()
-
-			inject(ctx, &metadataCopy)
-			ctx = metadata.NewOutgoingContext(ctx, metadataCopy)
-
-			messageSent.Event(ctx, defaultMessageID, req)
-		}
 
 		if o.UseCircuitBreaker {
 			success := make(chan bool, 1)
@@ -185,19 +154,54 @@ func peerAttr(addr string) []attribute.KeyValue {
 }
 
 func (o *GRPCUnaryInterceptorOptions) retryableInvoke(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
-	return utils.Retry(o.RetryCount, o.RetryInterval, func() error {
-		err := invoker(ctx, method, req, reply, cc, opts...)
+	return utils.Retry(o.RetryCount, o.RetryInterval, func() (err error) {
+		if !o.UseOpenTelemetry {
+			err = invoker(ctx, method, req, reply, cc, opts...)
 
-		if o.UseOpenTelemetry {
-			messageReceived.Event(ctx, 1, reply)
-
-			if err != nil {
-				s, _ := status.FromError(err)
-				Span.SetStatus(otelcodes.Error, s.Message())
-				Span.SetAttributes(statusCodeAttr(s.Code()))
-			} else {
-				Span.SetAttributes(statusCodeAttr(codes.OK))
+			if status.Code(err) != codes.Unavailable { // stop retrying unless Unavailable
+				return utils.NewRetryStopper(err)
 			}
+
+			return err
+		}
+
+		requestMetadata, _ := metadata.FromOutgoingContext(ctx)
+		metadataCopy := requestMetadata.Copy()
+		tracer := newConfig().TracerProvider.Tracer(
+			instrumentationName,
+		)
+
+		name, attr := spanInfo(method, cc.Target())
+
+		var span trace.Span
+		ctx, span = tracer.Start(
+			ctx,
+			name,
+			trace.WithSpanKind(trace.SpanKindClient),
+			trace.WithAttributes(attr...),
+		)
+		defer span.End()
+
+		inject(ctx, &metadataCopy)
+		ctx = metadata.NewOutgoingContext(ctx, metadataCopy)
+
+		messageSent.Event(ctx, defaultMessageID, req)
+
+		err = invoker(ctx, method, req, reply, cc, opts...)
+
+		messageReceived.Event(ctx, defaultMessageID, reply)
+
+		switch {
+		case span == nil:
+			logrus.WithFields(logrus.Fields{
+				"context": utils.DumpIncomingContext(ctx),
+			}).Error("span is nil")
+		case err != nil:
+			s, _ := status.FromError(err)
+			span.SetStatus(otelcodes.Error, s.Message())
+			span.SetAttributes(statusCodeAttr(s.Code()))
+		default:
+			span.SetAttributes(statusCodeAttr(codes.OK))
 		}
 
 		if status.Code(err) != codes.Unavailable { // stop retrying unless Unavailable
@@ -254,7 +258,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 			)
 			defer Span.End()
 
-			messageReceived.Event(ctx, 1, req)
+			messageReceived.Event(ctx, defaultMessageID, req)
 
 		}
 
