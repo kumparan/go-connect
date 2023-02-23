@@ -7,7 +7,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/kumparan/go-utils"
-	"github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/ulule/limiter/v3"
