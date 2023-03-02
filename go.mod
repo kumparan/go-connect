@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
-	github.com/go-redis/redis/v8 v8.11.5
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/imdario/mergo v0.3.13
 	github.com/jpillora/backoff v1.0.0
@@ -15,7 +14,7 @@ require (
 	github.com/redis/go-redis/v9 v9.0.2
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.8.1
-	github.com/ulule/limiter/v3 v3.10.0
+	github.com/ulule/limiter/v3 v3.11.0
 	github.com/uptrace/opentelemetry-go-extra/otelgorm v0.1.21
 	go.opentelemetry.io/otel v1.13.0
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.13.0
@@ -52,7 +51,7 @@ require (
 	github.com/leekchan/accounting v0.3.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.2 // indirect
-	github.com/mattn/go-isatty v0.0.12 // indirect
+	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.18 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
