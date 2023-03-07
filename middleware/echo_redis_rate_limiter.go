@@ -3,7 +3,6 @@ package middleware
 import (
 	"net/http"
 	"regexp"
-	"strconv"
 
 	"github.com/kumparan/go-utils"
 	"github.com/labstack/echo/v4"
@@ -53,11 +52,6 @@ func (r RedisIPRateLimiter) Limit() echo.MiddlewareFunc {
 					"message": err,
 				})
 			}
-
-			h := c.Response().Header()
-			h.Set("X-RateLimit-Limit", strconv.FormatInt(limiterCtx.Limit, 10))
-			h.Set("X-RateLimit-Remaining", strconv.FormatInt(limiterCtx.Remaining, 10))
-			h.Set("X-RateLimit-Reset", strconv.FormatInt(limiterCtx.Reset, 10))
 
 			if limiterCtx.Reached {
 				log.Printf("Too Many Requests from %s on %s", ip, c.Request().URL)
