@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/kumparan/go-utils"
 	"github.com/labstack/echo/v4"
@@ -17,12 +18,13 @@ var privateIPAddressRegex = regexp.MustCompile(`(10(?:\\.(25[0-5]|2[0-4][0-9]|[0
 
 // RedisIPRateLimiter is the redis store that implements IP Based rate limiter
 type RedisIPRateLimiter struct {
-	ipLimiter   *limiter.Limiter
-	excludedIPs []string
+	ipLimiter          *limiter.Limiter
+	excludedIPs        []string
+	excludedUserAgents []string
 }
 
 // NewRedisIPRateLimiter initializes RedisIPRateLimiter
-func NewRedisIPRateLimiter(redisClient *redis.Client, rate limiter.Rate, excludedIPs []string) (redisLimiter RedisIPRateLimiter, err error) {
+func NewRedisIPRateLimiter(redisClient *redis.Client, rate limiter.Rate, excludedIPs []string, excludedUserAgents []string) (redisLimiter RedisIPRateLimiter, err error) {
 	store, err := redisStore.NewStoreWithOptions(redisClient, limiter.StoreOptions{
 		Prefix: "rate-limiter:",
 	})
@@ -30,9 +32,14 @@ func NewRedisIPRateLimiter(redisClient *redis.Client, rate limiter.Rate, exclude
 		return
 	}
 
+	var formattedExcludedUserAgents []string
+	for _, v := range excludedUserAgents {
+		formattedExcludedUserAgents = append(formattedExcludedUserAgents, strings.TrimSpace(strings.ToLower(v)))
+	}
 	return RedisIPRateLimiter{
-		ipLimiter:   limiter.New(store, rate),
-		excludedIPs: excludedIPs,
+		ipLimiter:          limiter.New(store, rate),
+		excludedIPs:        excludedIPs,
+		excludedUserAgents: formattedExcludedUserAgents,
 	}, nil
 }
 
@@ -42,6 +49,9 @@ func (r RedisIPRateLimiter) Limit() echo.MiddlewareFunc {
 		return func(c echo.Context) (err error) {
 			ip := c.RealIP()
 			if privateIPAddressRegex.MatchString(ip) || utils.Contains[string](r.excludedIPs, ip) {
+				return next(c)
+			}
+			if utils.Contains[string](r.excludedUserAgents, strings.TrimSpace(strings.ToLower(c.Request().UserAgent()))) {
 				return next(c)
 			}
 			limiterCtx, err := r.ipLimiter.Get(c.Request().Context(), ip)
