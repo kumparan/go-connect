@@ -1,4 +1,4 @@
-package connect
+package middleware
 
 import (
 	"context"
@@ -6,6 +6,11 @@ import (
 	"github.com/hibiken/asynq"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+)
+
+const (
+	// instrumentationName is the name of this instrumentation package.
+	instrumentationName = "github.com/kumparan/go-connect"
 )
 
 // AsynqTaskTracerMiddleware tracer for asynq task, place this middleware on mux
