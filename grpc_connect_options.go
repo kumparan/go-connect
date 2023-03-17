@@ -57,6 +57,10 @@ var (
 	messageReceived = messageType(attribute.Key("message.type").String("RECEIVED"))
 )
 
+// RecoveryHandlerFunc is a function that recovers from the panic `p` by returning an `error`.
+// The context can be used to extract request scoped metadata and context values.
+type RecoveryHandlerFunc func(ctx context.Context, p interface{}) (err error)
+
 // GRPCUnaryInterceptorOptions wrapper options for the grpc connection
 type GRPCUnaryInterceptorOptions struct {
 	// UseCircuitBreaker flag if the connection will implement a circuit breaker
@@ -74,6 +78,8 @@ type GRPCUnaryInterceptorOptions struct {
 
 	// UseOpenTelemetry flag if the connection will implement open telemetry
 	UseOpenTelemetry bool
+
+	RecoveryHandlerFunc RecoveryHandlerFunc
 }
 
 var defaultGRPCUnaryInterceptorOptions = &GRPCUnaryInterceptorOptions{
@@ -233,11 +239,19 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 		req interface{},
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
-	) (interface{}, error) {
+	) (_ interface{}, err error) {
+		panicked := true // default value, if not panic, this will be false
+
+		defer func() {
+			if r := recover(); r != nil || panicked {
+				err = recoverFrom(ctx, r, opts.RecoveryHandlerFunc)
+			}
+		}()
+
 		ctx, cancel := context.WithTimeout(ctx, opts.Timeout)
 		defer cancel()
 
-		var Span trace.Span
+		var span trace.Span
 		if opts.UseOpenTelemetry {
 			requestMetadata, _ := metadata.FromIncomingContext(ctx)
 			metadataCopy := requestMetadata.Copy()
@@ -250,13 +264,13 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 			)
 
 			name, attr := spanInfo(info.FullMethod, peerFromCtx(ctx))
-			ctx, Span = tracer.Start(
+			ctx, span = tracer.Start(
 				trace.ContextWithRemoteSpanContext(ctx, spanCtx),
 				name,
 				trace.WithSpanKind(trace.SpanKindServer),
 				trace.WithAttributes(attr...),
 			)
-			defer Span.End()
+			defer span.End()
 
 			messageReceived.Event(ctx, defaultMessageID, req)
 
@@ -266,15 +280,23 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 		if opts.UseOpenTelemetry {
 			if err != nil {
 				s, _ := status.FromError(err)
-				Span.SetStatus(otelcodes.Error, s.Message())
-				Span.SetAttributes(statusCodeAttr(s.Code()))
+				span.SetStatus(otelcodes.Error, s.Message())
+				span.SetAttributes(statusCodeAttr(s.Code()))
 				messageSent.Event(ctx, defaultMessageID, s.Proto())
 			} else {
-				Span.SetAttributes(statusCodeAttr(codes.OK))
+				span.SetAttributes(statusCodeAttr(codes.OK))
 				messageSent.Event(ctx, defaultMessageID, resp)
 			}
 		}
 
+		panicked = false
 		return resp, err
 	}
+}
+
+func recoverFrom(ctx context.Context, p interface{}, r RecoveryHandlerFunc) error {
+	if r == nil {
+		return status.Errorf(codes.Internal, "%v", p)
+	}
+	return r(ctx, p)
 }
