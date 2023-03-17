@@ -240,7 +240,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
 	) (_ interface{}, err error) {
-		panicked := true // default value, if not panic, this will be false
+		panicked := true // default value, if not panic, this will be changed to false before the defer func called
 
 		defer func() {
 			if r := recover(); r != nil || panicked {
