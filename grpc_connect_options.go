@@ -2,8 +2,11 @@ package connect
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"time"
+
+	"runtime/debug"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/peer"
@@ -17,6 +20,7 @@ import (
 	"google.golang.org/grpc"
 
 	"github.com/imdario/mergo"
+	"github.com/kumparan/cacher"
 	"github.com/kumparan/go-connect/internal"
 	"github.com/kumparan/go-utils"
 	"go.opentelemetry.io/otel/attribute"
@@ -79,6 +83,15 @@ type GRPCUnaryInterceptorOptions struct {
 	// UseOpenTelemetry flag if the connection will implement open telemetry
 	UseOpenTelemetry bool
 
+	// UseRateLimiter flag if the connection will implement rate limiter
+	UseRateLimiter bool
+
+	// RateLimiterLimit limit the request
+	RateLimiterLimit int
+
+	// RateLimiterPeriod limit period
+	RateLimiterPeriod time.Duration
+
 	RecoveryHandlerFunc RecoveryHandlerFunc
 }
 
@@ -88,6 +101,16 @@ var defaultGRPCUnaryInterceptorOptions = &GRPCUnaryInterceptorOptions{
 	RetryInterval:     20 * time.Millisecond,
 	Timeout:           1 * time.Second,
 	UseOpenTelemetry:  false,
+	UseRateLimiter:    false,
+	RateLimiterLimit:  20,
+	RateLimiterPeriod: 1 * time.Second,
+	RecoveryHandlerFunc: func(ctx context.Context, p interface{}) (err error) {
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.DumpIncomingContext(ctx),
+			"stackTrace": string(debug.Stack()),
+		}).Errorf("panic recovered: %v", p)
+		return status.Error(codes.Internal, "internal server error")
+	},
 }
 
 // UnaryClientInterceptor wrapper with circuit breaker, retry, timeout, open telemetry, and metadata logging
@@ -233,13 +256,13 @@ func statusCodeAttr(c codes.Code) attribute.KeyValue {
 }
 
 // UnaryServerInterceptor wrapper with open telemetry
-func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerInterceptor {
+func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, cacheKeeper cacher.Keeper) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
 		info *grpc.UnaryServerInfo,
 		handler grpc.UnaryHandler,
-	) (_ interface{}, err error) {
+	) (resp interface{}, err error) {
 		panicked := true // default value, if not panic, this will be changed to false before the defer func called
 
 		defer func() {
@@ -276,7 +299,21 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 
 		}
 
-		resp, err := handler(ctx, req)
+		if opts.UseRateLimiter {
+			meta, ok := metadata.FromIncomingContext(ctx)
+			if !ok || len(meta.Get(string(ipAddressKey))) <= 0 {
+				panicked = false
+				return resp, status.Errorf(codes.Internal, "failed to get ip address from context")
+			}
+
+			ipAddress := meta.Get(string(ipAddressKey))[0]
+			if ipAddress != "" && cacheKeeper != nil && isRateLimited(cacheKeeper, ipAddress, opts.RateLimiterLimit, opts.RateLimiterPeriod) {
+				panicked = false
+				return resp, status.Errorf(codes.ResourceExhausted, "too many requests")
+			}
+		}
+
+		resp, err = handler(ctx, req)
 		if opts.UseOpenTelemetry {
 			if err != nil {
 				s, _ := status.FromError(err)
@@ -296,7 +333,32 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryServerI
 
 func recoverFrom(ctx context.Context, p interface{}, r RecoveryHandlerFunc) error {
 	if r == nil {
+		logrus.WithFields(logrus.Fields{
+			"ctx":        utils.DumpIncomingContext(ctx),
+			"stackTrace": string(debug.Stack()),
+		}).Errorf("panic recovered: %v", p)
 		return status.Errorf(codes.Internal, "%v", p)
 	}
 	return r(ctx, p)
+}
+
+func isRateLimited(cacheKeeper cacher.Keeper, ip string, limit int, period time.Duration) bool {
+	cacheKey := fmt.Sprintf("grpc-rate-limiter:ip:%s", ip)
+	reply, err := cacheKeeper.Get(cacheKey)
+	if err != nil {
+		logrus.Error(err)
+		return false
+	}
+
+	count := int(utils.InterfaceBytesToInt64(reply))
+	switch {
+	case count >= limit:
+		return true
+	case count > 0:
+		_ = cacheKeeper.IncreaseCachedValueByOne(cacheKey)
+	case count == 0:
+		_ = cacheKeeper.StoreWithoutBlocking(cacher.NewItemWithCustomTTL(cacheKey, 1, period))
+	}
+
+	return false
 }

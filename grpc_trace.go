@@ -11,6 +11,8 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
+type contextKey string
+
 const (
 	// instrumentationName is the name of this instrumentation package.
 	instrumentationName = "github.com/kumparan/go-connect"
@@ -18,6 +20,9 @@ const (
 	grpcStatusCodeKey = attribute.Key("rpc.grpc.status_code")
 	// defaultMessageID is default id for event message
 	defaultMessageID = 1
+
+	// ipAddressKey represents key to get ip address
+	ipAddressKey = contextKey("ip_address")
 )
 
 // config is a group of options for this instrumentation.

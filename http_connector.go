@@ -29,7 +29,7 @@ func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 		Timeout: options.Timeout,
 		Transport: &http.Transport{
 			TLSHandshakeTimeout: options.TLSHandshakeTimeout,
-			TLSClientConfig:     &tls.Config{InsecureSkipVerify: options.TLSInsecureSkipVerify},
+			TLSClientConfig:     &tls.Config{InsecureSkipVerify: options.TLSInsecureSkipVerify}, //nolint:gosec
 		},
 	}
 
