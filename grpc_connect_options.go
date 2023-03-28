@@ -302,15 +302,14 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, redisClient *redi
 
 		if opts.UseRateLimiter && redisClient != nil {
 			meta, ok := metadata.FromIncomingContext(ctx)
-			if !ok || len(meta.Get(string(ipAddressKey))) <= 0 {
-				panicked = false
-				return resp, status.Errorf(codes.Internal, "failed to get ip address from context")
-			}
-
-			ipAddress := meta.Get(string(ipAddressKey))[0]
-			if ipAddress != "" && isRateLimited(ctx, redisClient, ipAddress, opts.RateLimiterLimit, opts.RateLimiterPeriod) {
-				panicked = false
-				return resp, status.Errorf(codes.ResourceExhausted, "too many requests")
+			switch {
+			case !ok || len(meta.Get(string(ipAddressKey))) <= 0:
+			default:
+				ipAddress := meta.Get(string(ipAddressKey))[0]
+				if ipAddress != "" && isRateLimited(ctx, redisClient, ipAddress, opts.RateLimiterLimit, opts.RateLimiterPeriod) {
+					panicked = false
+					return resp, status.Errorf(codes.ResourceExhausted, "too many requests")
+				}
 			}
 		}
 
