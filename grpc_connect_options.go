@@ -303,6 +303,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, redisClient *redi
 		if opts.UseRateLimiter && redisClient != nil {
 			meta, ok := metadata.FromIncomingContext(ctx)
 			switch {
+			// skip if the ip address metadata is not found
 			case !ok || len(meta.Get(string(ipAddressKey))) <= 0:
 			default:
 				ipAddress := meta.Get(string(ipAddressKey))[0]
