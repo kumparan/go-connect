@@ -2,7 +2,6 @@ package connect
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"time"
 
@@ -13,14 +12,16 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/afex/hystrix-go/hystrix"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
+	"github.com/ulule/limiter/v3"
+	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
 
 	"google.golang.org/grpc/metadata"
 
 	"google.golang.org/grpc"
 
 	"github.com/imdario/mergo"
-	"github.com/kumparan/cacher"
 	"github.com/kumparan/go-connect/internal"
 	"github.com/kumparan/go-utils"
 	"go.opentelemetry.io/otel/attribute"
@@ -87,7 +88,7 @@ type GRPCUnaryInterceptorOptions struct {
 	UseRateLimiter bool
 
 	// RateLimiterLimit limit the request
-	RateLimiterLimit int
+	RateLimiterLimit int64
 
 	// RateLimiterPeriod limit period
 	RateLimiterPeriod time.Duration
@@ -102,7 +103,7 @@ var defaultGRPCUnaryInterceptorOptions = &GRPCUnaryInterceptorOptions{
 	Timeout:           1 * time.Second,
 	UseOpenTelemetry:  false,
 	UseRateLimiter:    false,
-	RateLimiterLimit:  20,
+	RateLimiterLimit:  100,
 	RateLimiterPeriod: 1 * time.Second,
 	RecoveryHandlerFunc: func(ctx context.Context, p interface{}) (err error) {
 		logrus.WithFields(logrus.Fields{
@@ -256,7 +257,7 @@ func statusCodeAttr(c codes.Code) attribute.KeyValue {
 }
 
 // UnaryServerInterceptor wrapper with open telemetry
-func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, cacheKeeper cacher.Keeper) grpc.UnaryServerInterceptor {
+func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, redisClient *redis.Client) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
 		req interface{},
@@ -299,7 +300,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, cacheKeeper cache
 
 		}
 
-		if opts.UseRateLimiter {
+		if opts.UseRateLimiter && redisClient != nil {
 			meta, ok := metadata.FromIncomingContext(ctx)
 			if !ok || len(meta.Get(string(ipAddressKey))) <= 0 {
 				panicked = false
@@ -307,7 +308,7 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, cacheKeeper cache
 			}
 
 			ipAddress := meta.Get(string(ipAddressKey))[0]
-			if ipAddress != "" && cacheKeeper != nil && isRateLimited(cacheKeeper, ipAddress, opts.RateLimiterLimit, opts.RateLimiterPeriod) {
+			if ipAddress != "" && isRateLimited(ctx, redisClient, ipAddress, opts.RateLimiterLimit, opts.RateLimiterPeriod) {
 				panicked = false
 				return resp, status.Errorf(codes.ResourceExhausted, "too many requests")
 			}
@@ -342,22 +343,23 @@ func recoverFrom(ctx context.Context, p interface{}, r RecoveryHandlerFunc) erro
 	return r(ctx, p)
 }
 
-func isRateLimited(cacheKeeper cacher.Keeper, ip string, limit int, period time.Duration) bool {
-	cacheKey := fmt.Sprintf("grpc-rate-limiter:ip:%s", ip)
-	reply, err := cacheKeeper.Get(cacheKey)
+func isRateLimited(ctx context.Context, redisClient *redis.Client, ip string, limit int64, period time.Duration) bool {
+	store, err := redisStore.NewStoreWithOptions(redisClient, limiter.StoreOptions{
+		Prefix: "grpc-rate-limiter:",
+	})
 	if err != nil {
-		logrus.Error(err)
+		return false
+	}
+	limiterCtx, err := limiter.New(store, limiter.Rate{
+		Period: period,
+		Limit:  limit,
+	}).Get(ctx, ip)
+	if err != nil {
 		return false
 	}
 
-	count := int(utils.InterfaceBytesToInt64(reply))
-	switch {
-	case count >= limit:
+	if limiterCtx.Reached {
 		return true
-	case count > 0:
-		_ = cacheKeeper.IncreaseCachedValueByOne(cacheKey)
-	case count == 0:
-		_ = cacheKeeper.StoreWithoutBlocking(cacher.NewItemWithCustomTTL(cacheKey, 1, period))
 	}
 
 	return false
