@@ -3,6 +3,7 @@ package connect
 import (
 	"context"
 	"net"
+	"strings"
 	"time"
 
 	"runtime/debug"
@@ -23,6 +24,7 @@ import (
 
 	"github.com/imdario/mergo"
 	"github.com/kumparan/go-connect/internal"
+	"github.com/kumparan/go-connect/middleware"
 	"github.com/kumparan/go-utils"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
@@ -84,16 +86,18 @@ type GRPCUnaryInterceptorOptions struct {
 	// UseOpenTelemetry flag if the connection will implement open telemetry
 	UseOpenTelemetry bool
 
-	// UseRateLimiter flag if the connection will implement rate limiter
-	UseRateLimiter bool
-
-	// RateLimiterLimit limit the request
-	RateLimiterLimit int64
-
-	// RateLimiterPeriod limit period
-	RateLimiterPeriod time.Duration
+	// RateLimiter flag if the connection will implement rate limiter
+	RateLimiter *GRPCRateLimiter
 
 	RecoveryHandlerFunc RecoveryHandlerFunc
+}
+
+// GRPCRateLimiter wrapper for the gRPC rate limiter
+type GRPCRateLimiter struct {
+	Limit              int64
+	Period             time.Duration
+	ExcludedIPs        []string
+	ExcludedUserAgents []string
 }
 
 var defaultGRPCUnaryInterceptorOptions = &GRPCUnaryInterceptorOptions{
@@ -102,9 +106,12 @@ var defaultGRPCUnaryInterceptorOptions = &GRPCUnaryInterceptorOptions{
 	RetryInterval:     20 * time.Millisecond,
 	Timeout:           1 * time.Second,
 	UseOpenTelemetry:  false,
-	UseRateLimiter:    false,
-	RateLimiterLimit:  100,
-	RateLimiterPeriod: 1 * time.Second,
+	RateLimiter: &GRPCRateLimiter{
+		Limit:              100,
+		Period:             time.Second,
+		ExcludedIPs:        []string{},
+		ExcludedUserAgents: []string{},
+	},
 	RecoveryHandlerFunc: func(ctx context.Context, p interface{}) (err error) {
 		logrus.WithFields(logrus.Fields{
 			"ctx":        utils.DumpIncomingContext(ctx),
@@ -300,14 +307,18 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, redisClient *redi
 
 		}
 
-		if opts.UseRateLimiter && redisClient != nil {
+		if opts.RateLimiter != nil && redisClient != nil {
 			meta, ok := metadata.FromIncomingContext(ctx)
 			switch {
 			// skip if the ip address metadata is not found
 			case !ok || len(meta.Get(string(ipAddressKey))) <= 0:
 			default:
 				ipAddress := meta.Get(string(ipAddressKey))[0]
-				if ipAddress != "" && isRateLimited(ctx, redisClient, ipAddress, opts.RateLimiterLimit, opts.RateLimiterPeriod) {
+				var userAgent string
+				if len(meta.Get(string(userAgentKey))) > 0 {
+					userAgent = meta.Get(string(userAgentKey))[0]
+				}
+				if ipAddress != "" && isRateLimited(ctx, redisClient, ipAddress, userAgent, opts.RateLimiter) {
 					panicked = false
 					return resp, status.Errorf(codes.ResourceExhausted, "too many requests")
 				}
@@ -343,7 +354,15 @@ func recoverFrom(ctx context.Context, p interface{}, r RecoveryHandlerFunc) erro
 	return r(ctx, p)
 }
 
-func isRateLimited(ctx context.Context, redisClient *redis.Client, ip string, limit int64, period time.Duration) bool {
+func isRateLimited(ctx context.Context, redisClient *redis.Client, ip, userAgent string, ratelimiter *GRPCRateLimiter) bool {
+	switch {
+	case middleware.PrivateIPAddressRegex.MatchString(ip), utils.Contains[string](ratelimiter.ExcludedIPs, ip):
+		return false
+	case userAgent == "":
+	case utils.Contains[string](ratelimiter.ExcludedUserAgents, strings.TrimSpace(strings.ToLower(userAgent))):
+		return false
+	}
+
 	store, err := redisStore.NewStoreWithOptions(redisClient, limiter.StoreOptions{
 		Prefix: "grpc-rate-limiter:",
 	})
@@ -351,8 +370,8 @@ func isRateLimited(ctx context.Context, redisClient *redis.Client, ip string, li
 		return false
 	}
 	limiterCtx, err := limiter.New(store, limiter.Rate{
-		Period: period,
-		Limit:  limit,
+		Period: ratelimiter.Period,
+		Limit:  ratelimiter.Limit,
 	}).Get(ctx, ip)
 	if err != nil {
 		return false

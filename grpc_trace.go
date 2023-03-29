@@ -23,6 +23,8 @@ const (
 
 	// ipAddressKey represents key to get ip address
 	ipAddressKey = contextKey("ip_address")
+	// userAgentKey represents key to get user agent
+	userAgentKey = contextKey("user_agent")
 )
 
 // config is a group of options for this instrumentation.
