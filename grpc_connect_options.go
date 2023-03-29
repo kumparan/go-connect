@@ -319,13 +319,14 @@ func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, redisClient *redi
 					userAgent = meta.Get(string(userAgentKey))[0]
 				}
 				if ipAddress != "" && isRateLimited(ctx, redisClient, ipAddress, userAgent, opts.RateLimiter) {
-					panicked = false
-					return resp, status.Errorf(codes.ResourceExhausted, "too many requests")
+					err = status.Errorf(codes.ResourceExhausted, "too many requests")
+					goto TraceAndReturn
 				}
 			}
 		}
 
 		resp, err = handler(ctx, req)
+	TraceAndReturn:
 		if opts.UseOpenTelemetry {
 			if err != nil {
 				s, _ := status.FromError(err)
