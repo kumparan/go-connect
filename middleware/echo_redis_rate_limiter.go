@@ -14,7 +14,8 @@ import (
 	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
 )
 
-var privateIPAddressRegex = regexp.MustCompile(`(10(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$)|(192\\.168(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)|(172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)`)
+// PrivateIPAddressRegex for detects a valid IP address
+var PrivateIPAddressRegex = regexp.MustCompile(`(10(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$)|(192\\.168(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)|(172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){2}$)`)
 
 // RedisIPRateLimiter is the redis store that implements IP Based rate limiter
 type RedisIPRateLimiter struct {
@@ -48,7 +49,7 @@ func (r RedisIPRateLimiter) Limit() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) (err error) {
 			ip := c.RealIP()
-			if privateIPAddressRegex.MatchString(ip) || utils.Contains[string](r.excludedIPs, ip) {
+			if PrivateIPAddressRegex.MatchString(ip) || utils.Contains[string](r.excludedIPs, ip) {
 				return next(c)
 			}
 			if utils.Contains[string](r.excludedUserAgents, strings.TrimSpace(strings.ToLower(c.Request().UserAgent()))) {

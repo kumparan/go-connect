@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+
 	"github.com/hibiken/asynq"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
