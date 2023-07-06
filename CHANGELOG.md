@@ -1,7 +1,76 @@
 # go-connect
 
+<a name="v1.15.1"></a>
+## [v1.15.1] - 2023-07-06
+### Other Improvements
+- up grpc & echo lib version
+
+
+<a name="v1.15.0"></a>
+## [v1.15.0] - 2023-04-05
+### New Features
+- add RegisterHealthCheckService ([#29](https://github.com/kumparan/go-connect/issues/29))
+
+
+<a name="v1.14.0"></a>
+## [v1.14.0] - 2023-04-03
+### New Features
+- trace before return
+- add param excluded ips and user agents
+- grpc rate limiter
+
+### Other Improvements
+- add comment
+
+
+<a name="v1.13.0"></a>
+## [v1.13.0] - 2023-03-27
+### New Features
+- recover from panic ([#27](https://github.com/kumparan/go-connect/issues/27))
+
+
+<a name="v1.12.0"></a>
+## [v1.12.0] - 2023-03-13
+### New Features
+- add asynq task tracer middleware ([#26](https://github.com/kumparan/go-connect/issues/26))
+
+
+<a name="v1.11.0"></a>
+## [v1.11.0] - 2023-03-10
+### New Features
+- enable exclusion of user agents on rate limiter ([#25](https://github.com/kumparan/go-connect/issues/25))
+
+
+<a name="v1.10.1"></a>
+## [v1.10.1] - 2023-03-07
+### Fixes
+- remove rate limit information ([#24](https://github.com/kumparan/go-connect/issues/24))
+
+
+<a name="v1.10.0"></a>
+## [v1.10.0] - 2023-03-06
+### New Features
+- echo redis rate limiter support redis v7
+
+
+<a name="v1.9.1"></a>
+## [v1.9.1] - 2023-02-22
+### Fixes
+- bump otel version ([#22](https://github.com/kumparan/go-connect/issues/22))
+
+
+<a name="v1.9.0"></a>
+## [v1.9.0] - 2023-02-22
+### Fixes
+- move tracer into retryableInvoke
+- prevent panic on span set attributes
+
+### New Features
+- upgrade library to support goredis v9 for redis7 ([#21](https://github.com/kumparan/go-connect/issues/21))
+
+
 <a name="v1.8.0"></a>
-## [v1.8.0] - 2023-01-31
+## [v1.8.0] - 2023-02-01
 ### Code Improvements
 - move log level into opt
 - naming
@@ -123,7 +192,17 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.15.1...HEAD
+[v1.15.1]: https://github.com/kumparan/go-connect/compare/v1.15.0...v1.15.1
+[v1.15.0]: https://github.com/kumparan/go-connect/compare/v1.14.0...v1.15.0
+[v1.14.0]: https://github.com/kumparan/go-connect/compare/v1.13.0...v1.14.0
+[v1.13.0]: https://github.com/kumparan/go-connect/compare/v1.12.0...v1.13.0
+[v1.12.0]: https://github.com/kumparan/go-connect/compare/v1.11.0...v1.12.0
+[v1.11.0]: https://github.com/kumparan/go-connect/compare/v1.10.1...v1.11.0
+[v1.10.1]: https://github.com/kumparan/go-connect/compare/v1.10.0...v1.10.1
+[v1.10.0]: https://github.com/kumparan/go-connect/compare/v1.9.1...v1.10.0
+[v1.9.1]: https://github.com/kumparan/go-connect/compare/v1.9.0...v1.9.1
+[v1.9.0]: https://github.com/kumparan/go-connect/compare/v1.8.0...v1.9.0
 [v1.8.0]: https://github.com/kumparan/go-connect/compare/v1.7.0...v1.8.0
 [v1.7.0]: https://github.com/kumparan/go-connect/compare/v1.6.2...v1.7.0
 [v1.6.2]: https://github.com/kumparan/go-connect/compare/v1.6.1...v1.6.2
