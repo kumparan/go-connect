@@ -12,6 +12,7 @@ type HTTPConnectionOptions struct {
 	TLSInsecureSkipVerify bool
 	Timeout               time.Duration
 	UseOpenTelemetry      bool
+	EnableKeepAlives      bool
 }
 
 var defaultHTTPConnectionOptions = &HTTPConnectionOptions{
@@ -19,6 +20,7 @@ var defaultHTTPConnectionOptions = &HTTPConnectionOptions{
 	TLSInsecureSkipVerify: false,
 	Timeout:               200 * time.Second,
 	UseOpenTelemetry:      false,
+	EnableKeepAlives:      true,
 }
 
 // NewHTTPConnection new http client
@@ -30,6 +32,7 @@ func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 		Transport: &http.Transport{
 			TLSHandshakeTimeout: options.TLSHandshakeTimeout,
 			TLSClientConfig:     &tls.Config{InsecureSkipVerify: options.TLSInsecureSkipVerify}, //nolint:gosec
+			DisableKeepAlives:   !opt.EnableKeepAlives,
 		},
 	}
 
