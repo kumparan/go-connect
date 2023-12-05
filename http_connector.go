@@ -32,7 +32,7 @@ func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 		Transport: &http.Transport{
 			TLSHandshakeTimeout: options.TLSHandshakeTimeout,
 			TLSClientConfig:     &tls.Config{InsecureSkipVerify: options.TLSInsecureSkipVerify}, //nolint:gosec
-			DisableKeepAlives:   !opt.EnableKeepAlives,
+			DisableKeepAlives:   !options.EnableKeepAlives,
 		},
 	}
 
