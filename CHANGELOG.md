@@ -1,7 +1,13 @@
 # go-connect
 
+<a name="v1.16.1"></a>
+## [v1.16.1] - 2023-12-05
+### Fixes
+- use applied http conn options which is not nullable
+
+
 <a name="v1.16.0"></a>
-## [v1.16.0] - 2023-11-01
+## [v1.16.0] - 2023-11-16
 ### New Features
 - make keep-alive option configurable on http conn
 
@@ -198,7 +204,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.16.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.16.1...HEAD
+[v1.16.1]: https://github.com/kumparan/go-connect/compare/v1.16.0...v1.16.1
 [v1.16.0]: https://github.com/kumparan/go-connect/compare/v1.15.1...v1.16.0
 [v1.15.1]: https://github.com/kumparan/go-connect/compare/v1.15.0...v1.15.1
 [v1.15.0]: https://github.com/kumparan/go-connect/compare/v1.14.0...v1.15.0
