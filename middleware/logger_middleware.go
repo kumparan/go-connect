@@ -133,8 +133,7 @@ func (l *LoggerMiddleware) Intercept(next http.Handler) http.Handler {
 		}); err != nil {
 			return
 		}
-
-		_, err := l.logger.Writer().Write(buf.Bytes())
+		_, err := l.logger.Out.Write(buf.Bytes())
 		if err != nil {
 			logrus.Error(err)
 		}
