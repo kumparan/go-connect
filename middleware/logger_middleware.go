@@ -31,19 +31,18 @@ type LoggerMiddleware struct {
 
 // LoggerConfig :nodoc:
 type LoggerConfig struct {
-	format        string
-	customTagFunc CustomTagFunc
-	timeFormat    string
-	logger        *logrus.Logger
+	Format        string
+	CustomTagFunc CustomTagFunc
+	TimeFormat    string
 }
 
 // NewLoggerMiddleware :nodoc:
 func NewLoggerMiddleware(cfg *LoggerConfig) *LoggerMiddleware {
 	return &LoggerMiddleware{
-		template:      fasttemplate.New(cfg.format, "${", "}"),
-		customTagFunc: cfg.customTagFunc,
+		template:      fasttemplate.New(cfg.Format, "${", "}"),
+		customTagFunc: cfg.CustomTagFunc,
 		logger:        logrus.StandardLogger(),
-		timeFormat:    cfg.timeFormat,
+		timeFormat:    cfg.TimeFormat,
 	}
 }
 
