@@ -47,7 +47,7 @@ func NewLoggerMiddleware(cfg *LoggerConfig) *LoggerMiddleware {
 	}
 }
 
-func (l *LoggerMiddleware) intercept(next http.Handler) http.Handler {
+func (l *LoggerMiddleware) Intercept(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(writer, req)
