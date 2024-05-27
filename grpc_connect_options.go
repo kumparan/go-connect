@@ -48,7 +48,7 @@ type messageType attribute.KeyValue
 
 // Event adds an event of the messageType to the span associated with the
 // passed context with a message id.
-func (m messageType) Event(ctx context.Context, id int, message interface{}) {
+func (m messageType) Event(ctx context.Context, id int, _ interface{}) {
 	span := trace.SpanFromContext(ctx)
 	if !span.IsRecording() {
 		return

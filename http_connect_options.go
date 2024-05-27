@@ -3,7 +3,6 @@ package connect
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	"go.opentelemetry.io/otel"
@@ -66,12 +65,12 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		goto SetAttribute
 	}
 
-	buf, err = ioutil.ReadAll(req.Body)
+	buf, err = io.ReadAll(req.Body)
 	if err == nil {
 		attributes = append(attributes, attribute.String("http.body", string(buf)))
 	}
 
-	reader = ioutil.NopCloser(bytes.NewBuffer(buf))
+	reader = io.NopCloser(bytes.NewBuffer(buf))
 	req.Body = reader
 
 SetAttribute:

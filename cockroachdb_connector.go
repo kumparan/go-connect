@@ -160,14 +160,14 @@ func (g *GormCustomLogger) LogMode(level gormLogger.LogLevel) gormLogger.Interfa
 }
 
 // Info :nodoc:
-func (g *GormCustomLogger) Info(ctx context.Context, message string, values ...interface{}) {
+func (g *GormCustomLogger) Info(_ context.Context, message string, values ...interface{}) {
 	if g.LogLevel >= gormLogger.Info {
 		log.WithFields(log.Fields{"data": values}).Info(message)
 	}
 }
 
 // Warn :nodoc:
-func (g *GormCustomLogger) Warn(ctx context.Context, message string, values ...interface{}) {
+func (g *GormCustomLogger) Warn(_ context.Context, message string, values ...interface{}) {
 	if g.LogLevel >= gormLogger.Warn {
 		log.WithFields(log.Fields{"data": values}).Warn(message)
 	}
@@ -175,14 +175,14 @@ func (g *GormCustomLogger) Warn(ctx context.Context, message string, values ...i
 }
 
 // Error :nodoc:
-func (g *GormCustomLogger) Error(ctx context.Context, message string, values ...interface{}) {
+func (g *GormCustomLogger) Error(_ context.Context, message string, values ...interface{}) {
 	if g.LogLevel >= gormLogger.Error {
 		log.WithFields(log.Fields{"data": values}).Error(message)
 	}
 }
 
 // Trace :nodoc:
-func (g *GormCustomLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
+func (g *GormCustomLogger) Trace(_ context.Context, begin time.Time, fc func() (string, int64), err error) {
 	sql, rows := fc()
 	if g.LogLevel <= 0 {
 		return
