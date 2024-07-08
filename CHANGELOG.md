@@ -1,12 +1,24 @@
 # go-connect
 
+<a name="v1.18.0"></a>
+## [v1.18.0] - 2024-07-08
+### Fixes
+- create proper ping ([#36](https://github.com/kumparan/go-connect/issues/36))
+
+### New Features
+- add mysql connector
+
+### Other Improvements
+- upgrade go to 1.22
+
+
 <a name="v1.17.0"></a>
 ## [v1.17.0] - 2023-12-22
 ### Fixes
 - use applied http conn options which is not nullable ([#33](https://github.com/kumparan/go-connect/issues/33))
 
 ### Other Improvements
-- upgrade dependencies
+- upgrade dependencies ([#34](https://github.com/kumparan/go-connect/issues/34))
 
 
 <a name="v1.16.1"></a>
@@ -213,7 +225,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.17.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.18.0...HEAD
+[v1.18.0]: https://github.com/kumparan/go-connect/compare/v1.17.0...v1.18.0
 [v1.17.0]: https://github.com/kumparan/go-connect/compare/v1.16.1...v1.17.0
 [v1.16.1]: https://github.com/kumparan/go-connect/compare/v1.16.0...v1.16.1
 [v1.16.0]: https://github.com/kumparan/go-connect/compare/v1.15.1...v1.16.0

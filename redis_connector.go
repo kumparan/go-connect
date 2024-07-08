@@ -77,7 +77,7 @@ func NewRedigoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (
 			return c, err
 		},
 		MaxConnLifetime: options.MaxConnLifetime,
-		TestOnBorrow: func(c redigo.Conn, t time.Time) error {
+		TestOnBorrow: func(c redigo.Conn, _ time.Time) error {
 			_, err := c.Do("PING")
 			return err
 		},
