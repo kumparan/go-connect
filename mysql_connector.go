@@ -36,7 +36,7 @@ var (
 		ConnMaxLifetime:  1 * time.Hour,
 		LogLevel:         "info",
 		UseOpenTelemetry: false,
-		PingTimeout:      10 * time.Second,
+		PingTimeout:      5 * time.Second,
 	}
 )
 
