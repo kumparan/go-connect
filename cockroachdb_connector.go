@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/imdario/mergo"
+
 	"github.com/jpillora/backoff"
 	log "github.com/sirupsen/logrus"
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
@@ -24,6 +26,7 @@ type CockroachDBConnectionOptions struct {
 	ConnMaxLifetime  time.Duration
 	LogLevel         string
 	UseOpenTelemetry bool
+	PingTimeout      time.Duration
 }
 
 var (
@@ -42,6 +45,7 @@ var (
 		ConnMaxLifetime:  1 * time.Hour,
 		LogLevel:         "info",
 		UseOpenTelemetry: false,
+		PingTimeout:      5 * time.Second,
 	}
 )
 
@@ -81,9 +85,18 @@ func checkConnection(databaseDSN string, options *CockroachDBConnectionOptions, 
 			ticker.Stop()
 			return
 		case <-ticker.C:
-			if _, err := CockroachDB.DB(); err != nil {
+			db, err := CockroachDB.DB()
+			if err != nil {
+				reconnectCockroachConn(databaseDSN, options)
+				continue
+			}
+
+			ctx, cancelFunc := context.WithTimeout(context.TODO(), options.PingTimeout)
+			if err = db.PingContext(ctx); err != nil {
+				log.Errorf("ping to db got err : %v", err)
 				reconnectCockroachConn(databaseDSN, options)
 			}
+			cancelFunc()
 		}
 	}
 }
@@ -97,13 +110,15 @@ func reconnectCockroachConn(databaseDSN string, options *CockroachDBConnectionOp
 	}
 
 	for b.Attempt() < float64(options.RetryAttempts) {
+		log.Info("reconnecting to db")
 		conn, err := openCockroachConn(databaseDSN, options)
 		if err != nil {
 			log.WithField("databaseDSN", databaseDSN).Error("failed to connect cockroach database: ", err)
 		}
 
 		if conn != nil {
-			CockroachDB = conn
+			log.Info("db connected")
+			*CockroachDB = *conn
 			break
 		}
 		time.Sleep(b.Duration())
@@ -213,8 +228,11 @@ func (g *GormCustomLogger) Trace(_ context.Context, begin time.Time, fc func() (
 }
 
 func applyCockroachDBConnectionOptions(opt *CockroachDBConnectionOptions) *CockroachDBConnectionOptions {
-	if opt != nil {
-		return opt
+	if opt == nil {
+		return defaultCockroachDBConnectionOptions
 	}
-	return defaultCockroachDBConnectionOptions
+
+	// if error occurs, also return options from input
+	_ = mergo.Merge(opt, *defaultCockroachDBConnectionOptions)
+	return opt
 }
