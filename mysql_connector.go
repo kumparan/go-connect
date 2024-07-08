@@ -1,7 +1,10 @@
 package connect
 
 import (
+	"context"
 	"time"
+
+	"github.com/imdario/mergo"
 
 	"github.com/jpillora/backoff"
 	log "github.com/sirupsen/logrus"
@@ -20,6 +23,7 @@ type MySQLConnectionOptions struct {
 	ConnMaxLifetime   time.Duration
 	LogLevel          string
 	UseOpenTelemetry  bool
+	PingTimeout       time.Duration
 	ReconnectCallback func(db *gorm.DB) // func will provide new *gorm.DB if current connection is broken and re-creation of new connection is succeeded.
 }
 
@@ -32,6 +36,7 @@ var (
 		ConnMaxLifetime:  1 * time.Hour,
 		LogLevel:         "info",
 		UseOpenTelemetry: false,
+		PingTimeout:      10 * time.Second,
 	}
 )
 
@@ -95,19 +100,32 @@ func openMySQLConn(dsn string, opts *MySQLConnectionOptions) (*gorm.DB, error) {
 }
 
 func checkMySQLConnection(db *gorm.DB, databaseDSN string, stopTickerCh chan bool, options *MySQLConnectionOptions, ticker *time.Ticker) {
+
 	for {
 		select {
 		case <-stopTickerCh:
 			ticker.Stop()
 			return
 		case <-ticker.C:
-			if _, err := db.DB(); err != nil {
+			db, err := db.DB()
+			if err != nil {
+				log.Error("MySQL got disconnected!")
+				if options.ReconnectCallback == nil {
+					continue
+				}
+				reconnectMySQLConn(databaseDSN, options)
+				continue
+			}
+
+			ctx, cancelFunc := context.WithTimeout(context.TODO(), options.PingTimeout)
+			if err = db.PingContext(ctx); err != nil {
 				log.Error("MySQL got disconnected!")
 				if options.ReconnectCallback == nil {
 					continue
 				}
 				reconnectMySQLConn(databaseDSN, options)
 			}
+			cancelFunc()
 		}
 	}
 }
@@ -140,8 +158,11 @@ func reconnectMySQLConn(databaseDSN string, options *MySQLConnectionOptions) {
 }
 
 func applyMySQLConnectionOptions(opt *MySQLConnectionOptions) *MySQLConnectionOptions {
-	if opt != nil {
-		return opt
+	if opt == nil {
+		return defaultMySQLConnectionOptions
 	}
-	return defaultMySQLConnectionOptions
+
+	// if error occurs, also return options from input
+	_ = mergo.Merge(opt, *defaultMySQLConnectionOptions)
+	return opt
 }
