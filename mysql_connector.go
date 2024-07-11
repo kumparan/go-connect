@@ -121,6 +121,7 @@ func checkMySQLConnection(db *gorm.DB, databaseDSN string, stopTickerCh chan boo
 			if err = db.PingContext(ctx); err != nil {
 				log.Error("MySQL got disconnected!")
 				if options.ReconnectCallback == nil {
+					cancelFunc() // fix govet possible context leak
 					continue
 				}
 				reconnectMySQLConn(databaseDSN, options)

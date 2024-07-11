@@ -44,7 +44,11 @@ func InitTraceProvider(token, collectorURL, serviceName string, traceRatio float
 
 	traceProvider := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.TraceIDRatioBased(traceRatio)),
-		sdktrace.WithBatcher(exporter),
+		sdktrace.WithBatcher(
+			exporter,
+			sdktrace.WithMaxExportBatchSize(20),
+			sdktrace.WithMaxQueueSize(200),
+		),
 		sdktrace.WithResource(resources),
 	)
 
