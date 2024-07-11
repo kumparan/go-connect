@@ -264,6 +264,8 @@ func statusCodeAttr(c codes.Code) attribute.KeyValue {
 }
 
 // UnaryServerInterceptor wrapper with open telemetry
+//
+//gocognit:ignore
 func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, redisClient *redis.Client) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,

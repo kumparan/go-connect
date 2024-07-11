@@ -2,7 +2,7 @@ SHELL:=/bin/bash
 
 changelog_args=-o CHANGELOG.md -tag-filter-pattern '^v'
 
-lint:
+lint: check-cognitive-complexity
 	golangci-lint run
 
 changelog:
