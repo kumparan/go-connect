@@ -1,5 +1,11 @@
 # go-connect
 
+<a name="v1.18.1"></a>
+## [v1.18.1] - 2024-07-11
+### Other Improvements
+- fix vulnerability libraries and fix lint
+
+
 <a name="v1.18.0"></a>
 ## [v1.18.0] - 2024-07-08
 ### Fixes
@@ -225,7 +231,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.18.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.18.1...HEAD
+[v1.18.1]: https://github.com/kumparan/go-connect/compare/v1.18.0...v1.18.1
 [v1.18.0]: https://github.com/kumparan/go-connect/compare/v1.17.0...v1.18.0
 [v1.17.0]: https://github.com/kumparan/go-connect/compare/v1.16.1...v1.17.0
 [v1.16.1]: https://github.com/kumparan/go-connect/compare/v1.16.0...v1.16.1

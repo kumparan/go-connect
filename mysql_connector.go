@@ -99,6 +99,7 @@ func openMySQLConn(dsn string, opts *MySQLConnectionOptions) (*gorm.DB, error) {
 	return conn, nil
 }
 
+//gocognit:ignore
 func checkMySQLConnection(db *gorm.DB, databaseDSN string, stopTickerCh chan bool, options *MySQLConnectionOptions, ticker *time.Ticker) {
 
 	for {
@@ -121,6 +122,7 @@ func checkMySQLConnection(db *gorm.DB, databaseDSN string, stopTickerCh chan boo
 			if err = db.PingContext(ctx); err != nil {
 				log.Error("MySQL got disconnected!")
 				if options.ReconnectCallback == nil {
+					cancelFunc() // fix govet possible context leak
 					continue
 				}
 				reconnectMySQLConn(databaseDSN, options)

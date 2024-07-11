@@ -35,7 +35,7 @@ import (
 
 // NewUnaryGRPCConnection establish a new grpc connection
 func NewUnaryGRPCConnection(target string, dialOptions ...grpc.DialOption) (*grpc.ClientConn, error) {
-	conn, err := grpc.Dial(target, dialOptions...)
+	conn, err := grpc.NewClient(target, dialOptions...)
 	if err != nil {
 		logrus.Errorf("Error : %v", err)
 		return nil, err
@@ -264,6 +264,8 @@ func statusCodeAttr(c codes.Code) attribute.KeyValue {
 }
 
 // UnaryServerInterceptor wrapper with open telemetry
+//
+//gocognit:ignore
 func UnaryServerInterceptor(opts *GRPCUnaryInterceptorOptions, redisClient *redis.Client) grpc.UnaryServerInterceptor {
 	return func(
 		ctx context.Context,
