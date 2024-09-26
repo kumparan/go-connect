@@ -132,18 +132,31 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 
 		if o.UseCircuitBreaker {
 			success := make(chan bool, 1)
+			ignoredError := make(chan error, 1)
 			errC := hystrix.GoC(ctx, method, func(ctx context.Context) error {
 				err := o.retryableInvoke(ctx, method, req, reply, cc, invoker, opts...)
-				if err == nil {
+
+				switch status.Code(err) {
+				case codes.OK:
 					success <- true
+					return nil
+				case codes.Internal, // circuit breaker can only open by these error codes
+					codes.Unknown,
+					codes.Unavailable,
+					codes.DeadlineExceeded:
+					return err
+				default:
+					ignoredError <- err
+					return nil
 				}
-				return err
 			}, nil)
 
 			select {
 			case out := <-success:
 				logrus.Debugf("success %v", out)
 				return nil
+			case err := <-ignoredError:
+				return err
 			case err := <-errC:
 				logrus.Warnf("failed %s", err)
 				return err
