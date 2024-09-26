@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.18.2"></a>
+## [v1.18.2] - 2024-09-26
+### Other Improvements
+- circuit breaker can only open by certain error codes
+
+
 <a name="v1.18.1"></a>
 ## [v1.18.1] - 2024-07-11
 ### Other Improvements
-- fix vulnerability libraries and fix lint
+- fix vulnerabilities library and fix lint ([#37](https://github.com/kumparan/go-connect/issues/37))
 
 
 <a name="v1.18.0"></a>
@@ -231,7 +237,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.18.1...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.18.2...HEAD
+[v1.18.2]: https://github.com/kumparan/go-connect/compare/v1.18.1...v1.18.2
 [v1.18.1]: https://github.com/kumparan/go-connect/compare/v1.18.0...v1.18.1
 [v1.18.0]: https://github.com/kumparan/go-connect/compare/v1.17.0...v1.18.0
 [v1.17.0]: https://github.com/kumparan/go-connect/compare/v1.16.1...v1.17.0
