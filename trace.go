@@ -15,7 +15,7 @@ import (
 )
 
 // InitTraceProvider configures an OpenTelemetry exporter and trace provider
-func InitTraceProvider(token, collectorURL, serviceName string, traceRatio float64) *sdktrace.TracerProvider {
+func InitTraceProvider(token, collectorURL, serviceName, environment string, traceRatio float64) *sdktrace.TracerProvider {
 	headers := map[string]string{
 		"signoz-access-token": token,
 	}
@@ -36,6 +36,7 @@ func InitTraceProvider(token, collectorURL, serviceName string, traceRatio float
 		context.Background(),
 		resource.WithAttributes(
 			attribute.String("service.name", serviceName),
+			attribute.String("deployment.environment", environment),
 		),
 	)
 	if err != nil {

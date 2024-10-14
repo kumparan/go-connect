@@ -1,5 +1,11 @@
 # go-connect
 
+<a name="v1.19.0"></a>
+## [v1.19.0] - 2024-10-14
+### New Features
+- add deployment.environment resource in tracer
+
+
 <a name="v1.18.2"></a>
 ## [v1.18.2] - 2024-09-26
 ### Other Improvements
@@ -237,7 +243,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.18.2...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.19.0...HEAD
+[v1.19.0]: https://github.com/kumparan/go-connect/compare/v1.18.2...v1.19.0
 [v1.18.2]: https://github.com/kumparan/go-connect/compare/v1.18.1...v1.18.2
 [v1.18.1]: https://github.com/kumparan/go-connect/compare/v1.18.0...v1.18.1
 [v1.18.0]: https://github.com/kumparan/go-connect/compare/v1.17.0...v1.18.0
