@@ -136,7 +136,7 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 			errC := hystrix.GoC(ctx, method, func(ctx context.Context) error {
 				err := o.retryableInvoke(ctx, method, req, reply, cc, invoker, opts...)
 
-				switch status.Code(err) {
+				switch status.Code(err) { // nolint: exhaustive
 				case codes.OK:
 					success <- true
 					return nil

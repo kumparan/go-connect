@@ -8,8 +8,8 @@ require (
 	github.com/hibiken/asynq v0.25.1
 	github.com/imdario/mergo v0.3.16
 	github.com/jpillora/backoff v1.0.0
-	github.com/kumparan/go-utils v1.39.4
-	github.com/labstack/echo/v4 v4.13.2
+	github.com/kumparan/go-utils v1.39.5
+	github.com/labstack/echo/v4 v4.13.3
 	github.com/olivere/elastic/v7 v7.0.32
 	github.com/redis/go-redis/extra/redisotel/v9 v9.7.0
 	github.com/redis/go-redis/v9 v9.7.0
