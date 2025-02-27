@@ -12,7 +12,8 @@ import (
 
 // Transport for tracing HTTP operations.
 type Transport struct {
-	rt http.RoundTripper
+	rt             http.RoundTripper
+	connectionName string
 }
 
 // Option signature for specifying options, e.g. WithRoundTripper.
@@ -29,8 +30,10 @@ func WithRoundTripper(rt http.RoundTripper) Option {
 
 // NewTransport specifies a transport that will trace HTTP
 // and report back via OpenTracing.
-func NewTransport(opts ...Option) *Transport {
-	t := &Transport{}
+func NewTransport(connectionName string, opts ...Option) *Transport {
+	t := &Transport{
+		connectionName: connectionName,
+	}
 	for _, o := range opts {
 		o(t)
 	}
@@ -40,7 +43,7 @@ func NewTransport(opts ...Option) *Transport {
 // RoundTrip captures the request and starts an OpenTracing span
 // for HTTP operation.
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
-	ctx, span := otel.Tracer("HTTP").Start(req.Context(), "HTTPRequest")
+	ctx, span := otel.Tracer("HTTP").Start(req.Context(), t.connectionName)
 	defer span.End()
 
 	// See General (https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/semantic_conventions/span-general.md)

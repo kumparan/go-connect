@@ -52,7 +52,7 @@ func NewElasticsearchClient(url string, httpClient *http.Client, opt *Elasticsea
 	}
 	httpClient.Transport = httpTranspost
 	if options.UseOpenTelemetry {
-		httpClient.Transport = NewTransport(WithRoundTripper(httpTranspost))
+		httpClient.Transport = NewTransport("Elasticsearch", WithRoundTripper(httpTranspost))
 	}
 
 	return elastic.NewClient(
