@@ -43,6 +43,9 @@ func NewTransport(connectionName string, opts ...Option) *Transport {
 // RoundTrip captures the request and starts an OpenTracing span
 // for HTTP operation.
 func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.connectionName == "" {
+		t.connectionName = req.Host
+	}
 	ctx, span := otel.Tracer("HTTP").Start(req.Context(), t.connectionName)
 	defer span.End()
 
