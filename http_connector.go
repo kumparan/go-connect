@@ -13,6 +13,7 @@ type HTTPConnectionOptions struct {
 	Timeout               time.Duration
 	UseOpenTelemetry      bool
 	EnableKeepAlives      bool
+	Name                  string
 }
 
 var defaultHTTPConnectionOptions = &HTTPConnectionOptions{
@@ -21,6 +22,7 @@ var defaultHTTPConnectionOptions = &HTTPConnectionOptions{
 	Timeout:               200 * time.Second,
 	UseOpenTelemetry:      false,
 	EnableKeepAlives:      true,
+	Name:                  "HTTPRequest",
 }
 
 // NewHTTPConnection new http client
@@ -40,7 +42,7 @@ func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 		return httpClient
 	}
 
-	httpClient.Transport = NewTransport(WithRoundTripper(httpClient.Transport))
+	httpClient.Transport = NewTransport(options.Name, WithRoundTripper(httpClient.Transport))
 
 	return httpClient
 }

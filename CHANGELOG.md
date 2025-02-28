@@ -1,9 +1,21 @@
 # go-connect
 
-<a name="v1.19.1"></a>
-## [v1.19.1] - 2024-12-12
+<a name="v1.21.0"></a>
+## [v1.21.0] - 2025-02-27
+### New Features
+- customizeable span name in HTTP Request in trace
+
+
+<a name="v1.20.1"></a>
+## [v1.20.1] - 2024-12-19
 ### Fixes
-- upgrade go version dan dependencies to fix vulnerability issue
+- upgrade go/x/net dependencies vulnerability ([#41](https://github.com/kumparan/go-connect/issues/41))
+
+
+<a name="v1.20.0"></a>
+## [v1.20.0] - 2024-12-16
+### Fixes
+- upgrade go version dan dependencies to fix vulnerability issue ([#40](https://github.com/kumparan/go-connect/issues/40))
 
 
 <a name="v1.19.0"></a>
@@ -249,8 +261,10 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.19.1...HEAD
-[v1.19.1]: https://github.com/kumparan/go-connect/compare/v1.19.0...v1.19.1
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.21.0...HEAD
+[v1.21.0]: https://github.com/kumparan/go-connect/compare/v1.20.1...v1.21.0
+[v1.20.1]: https://github.com/kumparan/go-connect/compare/v1.20.0...v1.20.1
+[v1.20.0]: https://github.com/kumparan/go-connect/compare/v1.19.0...v1.20.0
 [v1.19.0]: https://github.com/kumparan/go-connect/compare/v1.18.2...v1.19.0
 [v1.18.2]: https://github.com/kumparan/go-connect/compare/v1.18.1...v1.18.2
 [v1.18.1]: https://github.com/kumparan/go-connect/compare/v1.18.0...v1.18.1
