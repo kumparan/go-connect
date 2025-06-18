@@ -34,3 +34,10 @@ func (s HealthCheckService) Watch(_ *grpc_health_v1.HealthCheckRequest, server g
 		Status: grpc_health_v1.HealthCheckResponse_SERVING,
 	})
 }
+
+// List :nodoc:
+func (s HealthCheckService) List(ctx context.Context, in *grpc_health_v1.HealthListRequest) (*grpc_health_v1.HealthListResponse, error) {
+	return &grpc_health_v1.HealthListResponse{
+		Statuses: map[string]*grpc_health_v1.HealthCheckResponse{},
+	}, nil
+}
