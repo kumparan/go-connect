@@ -1,9 +1,21 @@
 # go-connect
 
-<a name="v1.21.0"></a>
-## [v1.21.0] - 2025-02-27
+<a name="v1.23.0"></a>
+## [v1.23.0] - 2025-07-31
+### Other Improvements
+- use default health check server ([#44](https://github.com/kumparan/go-connect/issues/44))
+
+
+<a name="v1.22.0"></a>
+## [v1.22.0] - 2025-04-15
 ### New Features
-- customizeable span name in HTTP Request in trace
+- update to latest dependencies version to resolve security issues
+
+
+<a name="v1.21.0"></a>
+## [v1.21.0] - 2025-02-28
+### New Features
+- customizeable span name in HTTP Request in trace ([#42](https://github.com/kumparan/go-connect/issues/42))
 
 
 <a name="v1.20.1"></a>
@@ -261,7 +273,9 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.21.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.23.0...HEAD
+[v1.23.0]: https://github.com/kumparan/go-connect/compare/v1.22.0...v1.23.0
+[v1.22.0]: https://github.com/kumparan/go-connect/compare/v1.21.0...v1.22.0
 [v1.21.0]: https://github.com/kumparan/go-connect/compare/v1.20.1...v1.21.0
 [v1.20.1]: https://github.com/kumparan/go-connect/compare/v1.20.0...v1.20.1
 [v1.20.0]: https://github.com/kumparan/go-connect/compare/v1.19.0...v1.20.0
