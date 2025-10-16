@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.24.0"></a>
+## [v1.24.0] - 2025-10-16
+### New Features
+- upgrade go redis and set default buffer sizes
+
+
 <a name="v1.23.0"></a>
 ## [v1.23.0] - 2025-07-31
 ### Other Improvements
-- use default health check server ([#44](https://github.com/kumparan/go-connect/issues/44))
+- use default health check server ([#44](https://github.com/kumparan/go-connect/issues/44)) ([#45](https://github.com/kumparan/go-connect/issues/45))
 
 
 <a name="v1.22.0"></a>
@@ -273,7 +279,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.23.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.24.0...HEAD
+[v1.24.0]: https://github.com/kumparan/go-connect/compare/v1.23.0...v1.24.0
 [v1.23.0]: https://github.com/kumparan/go-connect/compare/v1.22.0...v1.23.0
 [v1.22.0]: https://github.com/kumparan/go-connect/compare/v1.21.0...v1.22.0
 [v1.21.0]: https://github.com/kumparan/go-connect/compare/v1.20.1...v1.21.0
