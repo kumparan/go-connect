@@ -45,6 +45,22 @@ type RedisConnectionPoolOptions struct {
 	// Close connections older than this duration. If the value is zero, then
 	// the pool does not close connections based on age.
 	MaxConnLifetime time.Duration
+
+	// ReadBufferSize is the size of the bufio.Reader buffer for each connection.
+	// Larger buffers can improve performance for commands that return large responses.
+	// Smaller buffers can improve memory usage for larger pools.
+	//
+	// default on go-redis: 32KiB (32768 bytes)
+	// default on go-connect: 4096 bytes
+	ReadBufferSize int
+
+	// WriteBufferSize is the size of the bufio.Writer buffer for each connection.
+	// Larger buffers can improve performance for large pipelines and commands with many arguments.
+	// Smaller buffers can improve memory usage for larger pools.
+	//
+	// default on gor-edis: 32KiB (32768 bytes)
+	// default on go-connect: 4096 bytes
+	WriteBufferSize int
 }
 
 var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
@@ -55,6 +71,8 @@ var defaultRedisConnectionPoolOptions = &RedisConnectionPoolOptions{
 	DialTimeout:     5 * time.Second,
 	WriteTimeout:    2 * time.Second,
 	ReadTimeout:     2 * time.Second,
+	ReadBufferSize:  4096,
+	WriteBufferSize: 4096,
 }
 
 // NewRedigoRedisConnectionPool uses redigo library to establish the redis connection pool
@@ -100,6 +118,8 @@ func NewGoRedisConnectionPool(url string, opt *RedisConnectionPoolOptions) (*gor
 	options.DialTimeout = myOptions.DialTimeout
 	options.WriteTimeout = myOptions.WriteTimeout
 	options.ReadTimeout = myOptions.ReadTimeout
+	options.ReadBufferSize = myOptions.ReadBufferSize
+	options.WriteBufferSize = myOptions.WriteBufferSize
 
 	client := goredis.NewClient(options)
 
@@ -130,6 +150,8 @@ func NewGoRedisClusterConnectionPool(urls []string, opt *RedisConnectionPoolOpti
 		WriteTimeout:    options.WriteTimeout,
 		ReadTimeout:     options.ReadTimeout,
 		ReadOnly:        options.ReadOnly,
+		ReadBufferSize:  options.ReadBufferSize,
+		WriteBufferSize: options.WriteBufferSize,
 		OnConnect: func(ctx context.Context, conn *goredis.Conn) error {
 			return conn.Ping(ctx).Err()
 		},
