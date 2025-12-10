@@ -132,7 +132,9 @@ func reconnectCockroachConn(databaseDSN string, options *CockroachDBConnectionOp
 
 func openCockroachConn(dsn string, options *CockroachDBConnectionOptions) (*gorm.DB, error) {
 	dialector := postgres.Open(dsn)
-	db, err := gorm.Open(dialector, &gorm.Config{})
+	db, err := gorm.Open(dialector, &gorm.Config{
+		NowFunc: time.Now().UTC,
+	})
 	if err != nil {
 		return nil, err
 	}
