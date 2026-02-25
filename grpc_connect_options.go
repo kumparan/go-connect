@@ -24,7 +24,6 @@ import (
 
 	"github.com/imdario/mergo"
 	"github.com/kumparan/go-connect/internal"
-	"github.com/kumparan/go-connect/middleware"
 	"github.com/kumparan/go-utils"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
@@ -372,7 +371,7 @@ func recoverFrom(ctx context.Context, p interface{}, r RecoveryHandlerFunc) erro
 
 func isRateLimited(ctx context.Context, redisClient *redis.Client, ip, userAgent string, ratelimiter *GRPCRateLimiter) bool {
 	switch {
-	case middleware.PrivateIPAddressRegex.MatchString(ip), utils.Contains[string](ratelimiter.ExcludedIPs, ip):
+	case internal.IsPrivateIP(ip), utils.Contains[string](ratelimiter.ExcludedIPs, ip):
 		return false
 	case userAgent == "":
 	case utils.Contains[string](ratelimiter.ExcludedUserAgents, strings.TrimSpace(strings.ToLower(userAgent))):

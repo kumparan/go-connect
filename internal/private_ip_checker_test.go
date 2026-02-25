@@ -1,4 +1,4 @@
-package middleware
+package internal
 
 import "testing"
 
