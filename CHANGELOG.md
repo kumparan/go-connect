@@ -1,9 +1,15 @@
 # go-connect
 
-<a name="v1.24.0"></a>
-## [v1.24.0] - 2025-10-16
+<a name="v1.25.0"></a>
+## [v1.25.0] - 2026-02-25
 ### New Features
-- upgrade go redis and set default buffer sizes
+- use CIDR class to determine private IP, rather than using Regex
+
+
+<a name="v1.24.0"></a>
+## [v1.24.0] - 2025-10-29
+### New Features
+- upgrade go redis and set default buffer sizes ([#46](https://github.com/kumparan/go-connect/issues/46))
 
 
 <a name="v1.23.0"></a>
@@ -279,7 +285,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.24.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.25.0...HEAD
+[v1.25.0]: https://github.com/kumparan/go-connect/compare/v1.24.0...v1.25.0
 [v1.24.0]: https://github.com/kumparan/go-connect/compare/v1.23.0...v1.24.0
 [v1.23.0]: https://github.com/kumparan/go-connect/compare/v1.22.0...v1.23.0
 [v1.22.0]: https://github.com/kumparan/go-connect/compare/v1.21.0...v1.22.0
