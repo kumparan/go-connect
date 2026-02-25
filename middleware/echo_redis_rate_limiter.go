@@ -14,6 +14,8 @@ import (
 	redisStore "github.com/ulule/limiter/v3/drivers/store/redis"
 )
 
+var privateBlocks = []*net.IPNet{mustCIDR("10.0.0.0/8"), mustCIDR("172.16.0.0/12"), mustCIDR("192.168.0.0/16")}
+
 // RedisIPRateLimiter is the redis store that implements IP-Based rate limiter
 type RedisIPRateLimiter struct {
 	ipLimiter          *limiter.Limiter
@@ -80,7 +82,6 @@ func isPrivateIP(ipStr string) bool {
 	if ip == nil {
 		return false
 	}
-	privateBlocks := []*net.IPNet{mustCIDR("10.0.0.0/8"), mustCIDR("172.16.0.0/12"), mustCIDR("192.168.0.0/16")}
 	for _, block := range privateBlocks {
 		if block.Contains(ip) {
 			return true
