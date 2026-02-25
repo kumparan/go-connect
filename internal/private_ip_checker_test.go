@@ -26,7 +26,7 @@ func Test_isPrivateIP(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		result := isPrivateIP(tt.ip)
+		result := IsPrivateIP(tt.ip)
 		if result != tt.expected {
 			t.Errorf("isPrivateIP(%s) = %v; want %v", tt.ip, result, tt.expected)
 		}
