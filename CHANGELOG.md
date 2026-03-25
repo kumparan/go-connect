@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.26.0"></a>
+## [v1.26.0] - 2026-03-25
+### Other Improvements
+- upgrade go & deps
+
+
 <a name="v1.25.0"></a>
 ## [v1.25.0] - 2026-02-25
 ### New Features
-- use CIDR class to determine private IP, rather than using Regex
+- use CIDR block to determine private IP, rather than using Regex ([#47](https://github.com/kumparan/go-connect/issues/47))
 
 
 <a name="v1.24.0"></a>
@@ -285,7 +291,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.25.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.26.0...HEAD
+[v1.26.0]: https://github.com/kumparan/go-connect/compare/v1.25.0...v1.26.0
 [v1.25.0]: https://github.com/kumparan/go-connect/compare/v1.24.0...v1.25.0
 [v1.24.0]: https://github.com/kumparan/go-connect/compare/v1.23.0...v1.24.0
 [v1.23.0]: https://github.com/kumparan/go-connect/compare/v1.22.0...v1.23.0
