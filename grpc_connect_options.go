@@ -126,8 +126,12 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 	return func(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 		ctx, cancel := context.WithTimeout(ctx, o.Timeout)
 		defer cancel()
-		requestIncomingMetaData, _ := metadata.FromIncomingContext(ctx)
-		inject(ctx, &requestIncomingMetaData)
+		requestIncomingMetaData, ok := metadata.FromIncomingContext(ctx)
+		if !ok {
+			requestIncomingMetaData = metadata.New(nil)
+		}
+
+		ctx = metadata.NewOutgoingContext(ctx, requestIncomingMetaData)
 		ctx = metadata.AppendToOutgoingContext(ctx, "caller", utils.MyCaller(5))
 
 		if o.UseCircuitBreaker {
