@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.27.0"></a>
+## [v1.27.0] - 2026-04-08
+### New Features
+- pass metadata from incoming context
+
+
 <a name="v1.26.0"></a>
 ## [v1.26.0] - 2026-03-25
 ### Other Improvements
-- upgrade go & deps
+- upgrade go 1.26 & deps ([#48](https://github.com/kumparan/go-connect/issues/48))
 
 
 <a name="v1.25.0"></a>
@@ -291,7 +297,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.26.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.27.0...HEAD
+[v1.27.0]: https://github.com/kumparan/go-connect/compare/v1.26.0...v1.27.0
 [v1.26.0]: https://github.com/kumparan/go-connect/compare/v1.25.0...v1.26.0
 [v1.25.0]: https://github.com/kumparan/go-connect/compare/v1.24.0...v1.25.0
 [v1.24.0]: https://github.com/kumparan/go-connect/compare/v1.23.0...v1.24.0

@@ -127,6 +127,10 @@ func UnaryClientInterceptor(opts *GRPCUnaryInterceptorOptions) grpc.UnaryClientI
 		ctx, cancel := context.WithTimeout(ctx, o.Timeout)
 		defer cancel()
 
+		if incomingMD, ok := metadata.FromIncomingContext(ctx); ok {
+			existingOutgoingMD, _ := metadata.FromOutgoingContext(ctx)
+			ctx = metadata.NewOutgoingContext(ctx, metadata.Join(existingOutgoingMD, incomingMD))
+		}
 		ctx = metadata.AppendToOutgoingContext(ctx, "caller", utils.MyCaller(5))
 
 		if o.UseCircuitBreaker {
