@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 
+	log "github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -61,6 +62,8 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	req = req.WithContext(ctx)
+
+	log.Infof("[%s] %s %s", t.connectionName, req.Method, req.URL.String())
 
 	var (
 		buf    []byte
