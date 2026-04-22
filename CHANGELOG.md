@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.28.0"></a>
+## [v1.28.0] - 2026-04-22
+### New Features
+- add http request log on http client
+
+
 <a name="v1.27.0"></a>
 ## [v1.27.0] - 2026-04-08
 ### New Features
-- pass metadata from incoming context
+- pass metadata from incoming context to outgoing context ([#49](https://github.com/kumparan/go-connect/issues/49))
 
 
 <a name="v1.26.0"></a>
@@ -297,7 +303,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.27.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.28.0...HEAD
+[v1.28.0]: https://github.com/kumparan/go-connect/compare/v1.27.0...v1.28.0
 [v1.27.0]: https://github.com/kumparan/go-connect/compare/v1.26.0...v1.27.0
 [v1.26.0]: https://github.com/kumparan/go-connect/compare/v1.25.0...v1.26.0
 [v1.25.0]: https://github.com/kumparan/go-connect/compare/v1.24.0...v1.25.0
