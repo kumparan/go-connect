@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.29.0"></a>
+## [v1.29.0] - 2026-05-13
+### Other Improvements
+- bump dependencies
+
+
 <a name="v1.28.0"></a>
 ## [v1.28.0] - 2026-04-22
 ### New Features
-- add http request log on http client
+- add http request log on http client ([#50](https://github.com/kumparan/go-connect/issues/50))
 
 
 <a name="v1.27.0"></a>
@@ -303,7 +309,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.28.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.29.0...HEAD
+[v1.29.0]: https://github.com/kumparan/go-connect/compare/v1.28.0...v1.29.0
 [v1.28.0]: https://github.com/kumparan/go-connect/compare/v1.27.0...v1.28.0
 [v1.27.0]: https://github.com/kumparan/go-connect/compare/v1.26.0...v1.27.0
 [v1.26.0]: https://github.com/kumparan/go-connect/compare/v1.25.0...v1.26.0
