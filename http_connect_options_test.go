@@ -14,12 +14,15 @@ import (
 )
 
 type mockRoundTripper struct {
-	resp *http.Response
-	err  error
+	statusCode int
+	err        error
 }
 
 func (m *mockRoundTripper) RoundTrip(_ *http.Request) (*http.Response, error) {
-	return m.resp, m.err
+	if m.err != nil {
+		return nil, m.err
+	}
+	return makeResponse(m.statusCode), nil
 }
 
 func makeResponse(statusCode int) *http.Response {
@@ -98,40 +101,46 @@ func TestCircuitBreakerTransport_RoundTrip(t *testing.T) {
 	}
 
 	t.Run("2xx - success, response returned", func(t *testing.T) {
-		mock := &mockRoundTripper{resp: makeResponse(200)}
+		mock := &mockRoundTripper{statusCode: 200}
 		cb := newCBTransport(t.Name(), mock)
 
 		resp, err := cb.RoundTrip(makeReq())
-		assert.NoError(t, err)
 		require.NotNil(t, resp)
+		defer resp.Body.Close()
+		assert.NoError(t, err)
 		assert.Equal(t, 200, resp.StatusCode)
 	})
 
 	t.Run("3xx - success, response returned", func(t *testing.T) {
-		mock := &mockRoundTripper{resp: makeResponse(301)}
+		mock := &mockRoundTripper{statusCode: 301}
 		cb := newCBTransport(t.Name(), mock)
 
 		resp, err := cb.RoundTrip(makeReq())
-		assert.NoError(t, err)
 		require.NotNil(t, resp)
+		defer resp.Body.Close()
+		assert.NoError(t, err)
 		assert.Equal(t, 301, resp.StatusCode)
 	})
 
 	t.Run("4xx - response returned, circuit not tripped", func(t *testing.T) {
-		mock := &mockRoundTripper{resp: makeResponse(404)}
+		mock := &mockRoundTripper{statusCode: 404}
 		cb := newCBTransport(t.Name(), mock)
 
 		resp, err := cb.RoundTrip(makeReq())
-		assert.NoError(t, err)
 		require.NotNil(t, resp)
+		defer resp.Body.Close()
+		assert.NoError(t, err)
 		assert.Equal(t, 404, resp.StatusCode)
 	})
 
 	t.Run("5xx - error returned", func(t *testing.T) {
-		mock := &mockRoundTripper{resp: makeResponse(500)}
+		mock := &mockRoundTripper{statusCode: 500}
 		cb := newCBTransport(t.Name(), mock)
 
 		resp, err := cb.RoundTrip(makeReq())
+		if resp != nil {
+			resp.Body.Close()
+		}
 		assert.Nil(t, resp)
 		assert.ErrorContains(t, err, "server error: 500")
 	})
@@ -141,6 +150,9 @@ func TestCircuitBreakerTransport_RoundTrip(t *testing.T) {
 		cb := newCBTransport(t.Name(), mock)
 
 		resp, err := cb.RoundTrip(makeReq())
+		if resp != nil {
+			resp.Body.Close()
+		}
 		assert.Nil(t, resp)
 		assert.ErrorContains(t, err, "dial failed")
 	})
@@ -153,16 +165,22 @@ func TestCircuitBreakerTransport_RoundTrip(t *testing.T) {
 			SleepWindow:            5000,
 		})
 
-		mock := &mockRoundTripper{resp: makeResponse(500)}
+		mock := &mockRoundTripper{statusCode: 500}
 		cb := newCBTransport(cmdName, mock)
 
 		// first call trips the circuit; hystrix updates metrics asynchronously
-		_, _ = cb.RoundTrip(makeReq())
+		firstResp, _ := cb.RoundTrip(makeReq())
+		if firstResp != nil {
+			firstResp.Body.Close()
+		}
 		time.Sleep(50 * time.Millisecond)
 
 		// subsequent call should get circuit-open error without hitting the mock
-		mock.resp = makeResponse(200) // would return success if mock were called
-		_, err := cb.RoundTrip(makeReq())
+		mock.statusCode = 200 // would return success if mock were called
+		secondResp, err := cb.RoundTrip(makeReq())
+		if secondResp != nil {
+			secondResp.Body.Close()
+		}
 		assert.Error(t, err)
 		assert.ErrorContains(t, err, "circuit open")
 	})

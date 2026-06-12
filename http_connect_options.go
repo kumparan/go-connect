@@ -62,7 +62,7 @@ func (t *CircuitBreakerTransport) RoundTrip(req *http.Request) (*http.Response, 
 			return err // network error should trips circuit
 		}
 		if resp.StatusCode >= 500 {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 			return fmt.Errorf("server error: %d", resp.StatusCode)
 		}
 		if resp.StatusCode >= 400 {
