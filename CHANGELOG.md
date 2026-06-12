@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.30.0"></a>
+## [v1.30.0] - 2026-06-12
+### New Features
+- add circuit breaker support to HTTP connector
+
+
 <a name="v1.29.0"></a>
 ## [v1.29.0] - 2026-05-13
 ### Other Improvements
-- bump dependencies
+- bump dependencies ([#51](https://github.com/kumparan/go-connect/issues/51))
 
 
 <a name="v1.28.0"></a>
@@ -309,7 +315,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.29.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.30.0...HEAD
+[v1.30.0]: https://github.com/kumparan/go-connect/compare/v1.29.0...v1.30.0
 [v1.29.0]: https://github.com/kumparan/go-connect/compare/v1.28.0...v1.29.0
 [v1.28.0]: https://github.com/kumparan/go-connect/compare/v1.27.0...v1.28.0
 [v1.27.0]: https://github.com/kumparan/go-connect/compare/v1.26.0...v1.27.0
