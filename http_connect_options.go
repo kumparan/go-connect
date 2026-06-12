@@ -2,9 +2,12 @@ package connect
 
 import (
 	"bytes"
+	"context"
+	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/afex/hystrix-go/hystrix"
 	log "github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -39,6 +42,45 @@ func NewTransport(connectionName string, opts ...Option) *Transport {
 		o(t)
 	}
 	return t
+}
+
+// CircuitBreakerTransport wraps http.RoundTripper with circuit breaker support using hystrix.
+// 5xx responses and network errors trip the circuit; 4xx responses are returned without affecting circuit state.
+type CircuitBreakerTransport struct {
+	commandName string
+	rt          http.RoundTripper
+}
+
+// RoundTrip executes the HTTP request inside a hystrix circuit breaker.
+func (t *CircuitBreakerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	success := make(chan *http.Response, 1)
+	ignoredResp := make(chan *http.Response, 1)
+
+	errC := hystrix.GoC(req.Context(), t.commandName, func(ctx context.Context) error {
+		resp, err := t.rt.RoundTrip(req.WithContext(ctx))
+		if err != nil {
+			return err // network error should trips circuit
+		}
+		if resp.StatusCode >= 500 {
+			resp.Body.Close()
+			return fmt.Errorf("server error: %d", resp.StatusCode)
+		}
+		if resp.StatusCode >= 400 {
+			ignoredResp <- resp // 4xx error should not trip circuit
+			return nil
+		}
+		success <- resp
+		return nil
+	}, nil)
+
+	select {
+	case resp := <-success:
+		return resp, nil
+	case resp := <-ignoredResp:
+		return resp, nil
+	case err := <-errC:
+		return nil, err
+	}
 }
 
 // RoundTrip captures the request and starts an OpenTracing span
