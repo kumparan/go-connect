@@ -69,7 +69,7 @@ func (t *CircuitBreakerTransport) RoundTrip(req *http.Request) (*http.Response, 
 	success := make(chan *http.Response, 1)
 	ignoredResp := make(chan *http.Response, 1)
 	cb, _, _ := hystrix.GetCircuit(t.commandName)
-	fmt.Println("IS_OPEN:", cb.IsOpen())
+	log.Info("CIRCUIT BREAKER IS_OPEN:", cb.IsOpen())
 	errC := hystrix.GoC(req.Context(), t.commandName, func(ctx context.Context) error {
 		resp, err := t.rt.RoundTrip(req.WithContext(ctx))
 		if err != nil {
