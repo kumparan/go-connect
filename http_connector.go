@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"net/http"
 	"time"
+
+	"github.com/afex/hystrix-go/hystrix"
 )
 
 // HTTPConnectionOptions options for the http connection
@@ -13,6 +15,7 @@ type HTTPConnectionOptions struct {
 	Timeout               time.Duration
 	UseOpenTelemetry      bool
 	UseCircuitBreaker     bool
+	CircuitBreakerConfig  *CircuitBreakerConfig
 	EnableKeepAlives      bool
 	Name                  string
 }
@@ -43,6 +46,13 @@ func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 
 	if options.UseCircuitBreaker {
 		rt = &CircuitBreakerTransport{commandName: options.Name, rt: rt}
+		if options.CircuitBreakerConfig == nil {
+			options.CircuitBreakerConfig = &defaultCircuitBreakerConfig
+		}
+		hystrix.ConfigureCommand(options.Name, hystrix.CommandConfig{
+			SleepWindow:           int(opt.CircuitBreakerConfig.SleepWindowInMS),
+			ErrorPercentThreshold: int(opt.CircuitBreakerConfig.ErrorPercentThreshold),
+		})
 	}
 
 	return &http.Client{Timeout: options.Timeout, Transport: rt}
