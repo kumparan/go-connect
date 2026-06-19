@@ -50,8 +50,9 @@ func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 			options.CircuitBreakerConfig = &defaultCircuitBreakerConfig
 		}
 		hystrix.ConfigureCommand(options.Name, hystrix.CommandConfig{
-			SleepWindow:           int(opt.CircuitBreakerConfig.SleepWindowInMS),
-			ErrorPercentThreshold: int(opt.CircuitBreakerConfig.ErrorPercentThreshold),
+			SleepWindow:            int(opt.CircuitBreakerConfig.SleepWindowInMS),
+			ErrorPercentThreshold:  int(opt.CircuitBreakerConfig.ErrorPercentThreshold),
+			RequestVolumeThreshold: int(opt.CircuitBreakerConfig.RequestVolumeThreshold),
 		})
 	}
 

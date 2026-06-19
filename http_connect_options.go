@@ -22,13 +22,15 @@ type Transport struct {
 
 // CircuitBreakerConfig configuration for circuit breaker
 type CircuitBreakerConfig struct {
-	SleepWindowInMS       int64
-	ErrorPercentThreshold int64
+	SleepWindowInMS        int64
+	ErrorPercentThreshold  int64
+	RequestVolumeThreshold int64
 }
 
 var defaultCircuitBreakerConfig = CircuitBreakerConfig{
-	SleepWindowInMS:       5000, // 5s
-	ErrorPercentThreshold: 40,
+	SleepWindowInMS:        5000, // 5s
+	ErrorPercentThreshold:  40,
+	RequestVolumeThreshold: 20,
 }
 
 // Option signature for specifying options, e.g. WithRoundTripper.
