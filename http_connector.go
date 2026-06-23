@@ -15,7 +15,7 @@ type HTTPConnectionOptions struct {
 	Timeout               time.Duration
 	UseOpenTelemetry      bool
 	UseCircuitBreaker     bool
-	CircuitBreakerConfig  *CircuitBreakerConfig
+	CircuitBreakerConfig  *CircuitSetting
 	EnableKeepAlives      bool
 	Name                  string
 }
@@ -50,9 +50,11 @@ func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 			options.CircuitBreakerConfig = &defaultCircuitBreakerConfig
 		}
 		hystrix.ConfigureCommand(options.Name, hystrix.CommandConfig{
-			SleepWindow:            int(opt.CircuitBreakerConfig.SleepWindowInMS),
-			ErrorPercentThreshold:  int(opt.CircuitBreakerConfig.ErrorPercentThreshold),
-			RequestVolumeThreshold: int(opt.CircuitBreakerConfig.RequestVolumeThreshold),
+			Timeout:                opt.CircuitBreakerConfig.Timeout,
+			MaxConcurrentRequests:  opt.CircuitBreakerConfig.MaxConcurrentRequests,
+			RequestVolumeThreshold: opt.CircuitBreakerConfig.RequestVolumeThreshold,
+			SleepWindow:            opt.CircuitBreakerConfig.SleepWindow,
+			ErrorPercentThreshold:  opt.CircuitBreakerConfig.ErrorPercentThreshold,
 		})
 	}
 
