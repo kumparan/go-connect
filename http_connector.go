@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	"net/http"
 	"time"
+
+	"github.com/afex/hystrix-go/hystrix"
 )
 
 // HTTPConnectionOptions options for the http connection
@@ -12,6 +14,8 @@ type HTTPConnectionOptions struct {
 	TLSInsecureSkipVerify bool
 	Timeout               time.Duration
 	UseOpenTelemetry      bool
+	UseCircuitBreaker     bool
+	CircuitBreakerConfig  *CircuitSetting
 	EnableKeepAlives      bool
 	Name                  string
 }
@@ -21,6 +25,7 @@ var defaultHTTPConnectionOptions = &HTTPConnectionOptions{
 	TLSInsecureSkipVerify: false,
 	Timeout:               200 * time.Second,
 	UseOpenTelemetry:      false,
+	UseCircuitBreaker:     false,
 	EnableKeepAlives:      true,
 	Name:                  "HTTPRequest",
 }
@@ -29,22 +34,31 @@ var defaultHTTPConnectionOptions = &HTTPConnectionOptions{
 func NewHTTPConnection(opt *HTTPConnectionOptions) *http.Client {
 	options := applyHTTPConnectionOptions(opt)
 
-	httpClient := &http.Client{
-		Timeout: options.Timeout,
-		Transport: &http.Transport{
-			TLSHandshakeTimeout: options.TLSHandshakeTimeout,
-			TLSClientConfig:     &tls.Config{InsecureSkipVerify: options.TLSInsecureSkipVerify}, //nolint:gosec
-			DisableKeepAlives:   !options.EnableKeepAlives,
-		},
+	var rt http.RoundTripper = &http.Transport{
+		TLSHandshakeTimeout: options.TLSHandshakeTimeout,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: options.TLSInsecureSkipVerify}, //nolint:gosec
+		DisableKeepAlives:   !options.EnableKeepAlives,
 	}
 
-	if !options.UseOpenTelemetry {
-		return httpClient
+	if options.UseOpenTelemetry {
+		rt = NewTransport(options.Name, WithRoundTripper(rt))
 	}
 
-	httpClient.Transport = NewTransport(options.Name, WithRoundTripper(httpClient.Transport))
+	if options.UseCircuitBreaker {
+		rt = &CircuitBreakerTransport{commandName: options.Name, rt: rt}
+		if options.CircuitBreakerConfig == nil {
+			options.CircuitBreakerConfig = &defaultCircuitBreakerConfig
+		}
+		hystrix.ConfigureCommand(options.Name, hystrix.CommandConfig{
+			Timeout:                opt.CircuitBreakerConfig.Timeout,
+			MaxConcurrentRequests:  opt.CircuitBreakerConfig.MaxConcurrentRequests,
+			RequestVolumeThreshold: opt.CircuitBreakerConfig.RequestVolumeThreshold,
+			SleepWindow:            opt.CircuitBreakerConfig.SleepWindow,
+			ErrorPercentThreshold:  opt.CircuitBreakerConfig.ErrorPercentThreshold,
+		})
+	}
 
-	return httpClient
+	return &http.Client{Timeout: options.Timeout, Transport: rt}
 }
 
 func applyHTTPConnectionOptions(opt *HTTPConnectionOptions) *HTTPConnectionOptions {
