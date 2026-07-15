@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.29.1"></a>
+## [v1.29.1] - 2026-07-15
+### Other Improvements
+- bump go.mod to fix security in crypto library
+
+
 <a name="v1.30.0"></a>
-## [v1.30.0] - 2026-06-12
+## [v1.30.0] - 2026-06-24
 ### New Features
-- add circuit breaker support to HTTP connector
+- add circuit breaker on http connector ([#52](https://github.com/kumparan/go-connect/issues/52))
 
 
 <a name="v1.29.0"></a>
@@ -315,7 +321,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.30.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.29.1...HEAD
+[v1.29.1]: https://github.com/kumparan/go-connect/compare/v1.30.0...v1.29.1
 [v1.30.0]: https://github.com/kumparan/go-connect/compare/v1.29.0...v1.30.0
 [v1.29.0]: https://github.com/kumparan/go-connect/compare/v1.28.0...v1.29.0
 [v1.28.0]: https://github.com/kumparan/go-connect/compare/v1.27.0...v1.28.0
