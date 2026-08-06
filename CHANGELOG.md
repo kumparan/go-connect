@@ -1,9 +1,15 @@
 # go-connect
 
-<a name="v1.29.1"></a>
-## [v1.29.1] - 2026-07-15
+<a name="v1.31.0"></a>
+## [v1.31.0] - 2026-08-06
+### New Features
+- add echo http request logger middleware
+
+
+<a name="v1.30.1"></a>
+## [v1.30.1] - 2026-07-15
 ### Other Improvements
-- bump go.mod to fix security in crypto library
+- bump go.mod to fix security in crypto library ([#53](https://github.com/kumparan/go-connect/issues/53))
 
 
 <a name="v1.30.0"></a>
@@ -321,8 +327,9 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.29.1...HEAD
-[v1.29.1]: https://github.com/kumparan/go-connect/compare/v1.30.0...v1.29.1
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.31.0...HEAD
+[v1.31.0]: https://github.com/kumparan/go-connect/compare/v1.30.1...v1.31.0
+[v1.30.1]: https://github.com/kumparan/go-connect/compare/v1.30.0...v1.30.1
 [v1.30.0]: https://github.com/kumparan/go-connect/compare/v1.29.0...v1.30.0
 [v1.29.0]: https://github.com/kumparan/go-connect/compare/v1.28.0...v1.29.0
 [v1.28.0]: https://github.com/kumparan/go-connect/compare/v1.27.0...v1.28.0
