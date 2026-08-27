@@ -19,14 +19,15 @@ import (
 
 // CockroachDBConnectionOptions options for the  CockroachDB connection
 type CockroachDBConnectionOptions struct {
-	PingInterval     time.Duration
-	RetryAttempts    int
-	MaxIdleConns     int
-	MaxOpenConns     int
-	ConnMaxLifetime  time.Duration
-	LogLevel         string
-	UseOpenTelemetry bool
-	PingTimeout      time.Duration
+	PingInterval                time.Duration
+	RetryAttempts               int
+	MaxIdleConns                int
+	MaxOpenConns                int
+	ConnMaxLifetime             time.Duration
+	LogLevel                    string
+	UseOpenTelemetry            bool
+	PingTimeout                 time.Duration
+	EnableDBPoolInstrumentation bool
 }
 
 var (
@@ -62,7 +63,9 @@ func InitializeCockroachConn(databaseDSN string, opt *CockroachDBConnectionOptio
 	StopTickerCh = make(chan bool)
 
 	go checkConnection(databaseDSN, options, time.NewTicker(options.PingInterval))
-	go logConnectionPoolMetrics(CockroachDB)
+	if options.EnableDBPoolInstrumentation {
+		go logConnectionPoolMetrics(CockroachDB)
+	}
 
 	CockroachDB.Logger = NewGormCustomLogger()
 
