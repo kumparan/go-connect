@@ -19,14 +19,15 @@ import (
 
 // CockroachDBConnectionOptions options for the  CockroachDB connection
 type CockroachDBConnectionOptions struct {
-	PingInterval     time.Duration
-	RetryAttempts    int
-	MaxIdleConns     int
-	MaxOpenConns     int
-	ConnMaxLifetime  time.Duration
-	LogLevel         string
-	UseOpenTelemetry bool
-	PingTimeout      time.Duration
+	PingInterval                time.Duration
+	RetryAttempts               int
+	MaxIdleConns                int
+	MaxOpenConns                int
+	ConnMaxLifetime             time.Duration
+	LogLevel                    string
+	UseOpenTelemetry            bool
+	PingTimeout                 time.Duration
+	EnableDBPoolInstrumentation bool
 }
 
 var (
@@ -62,6 +63,9 @@ func InitializeCockroachConn(databaseDSN string, opt *CockroachDBConnectionOptio
 	StopTickerCh = make(chan bool)
 
 	go checkConnection(databaseDSN, options, time.NewTicker(options.PingInterval))
+	if options.EnableDBPoolInstrumentation {
+		go logConnectionPoolMetrics(CockroachDB)
+	}
 
 	CockroachDB.Logger = NewGormCustomLogger()
 
@@ -98,6 +102,37 @@ func checkConnection(databaseDSN string, options *CockroachDBConnectionOptions, 
 			}
 			cancelFunc()
 		}
+	}
+}
+
+func logConnectionPoolMetrics(crdb *gorm.DB) {
+	sqlDB, err := crdb.DB()
+	if err != nil {
+		log.Error(err)
+	}
+	prev := sqlDB.Stats()
+
+	ticker := time.NewTicker(10 * time.Second)
+
+	for range ticker.C {
+		curr := sqlDB.Stats()
+
+		waitCountDelta := curr.WaitCount - prev.WaitCount
+		waitDurationDelta := curr.WaitDuration - prev.WaitDuration
+
+		var avgWait time.Duration
+		if waitCountDelta > 0 {
+			avgWait = waitDurationDelta / time.Duration(waitCountDelta)
+		}
+
+		log.WithFields(log.Fields{
+			"in_use":           curr.InUse,
+			"idle":             curr.Idle,
+			"wait_count_delta": waitCountDelta,
+			"avg_wait_ms":      avgWait.Milliseconds(),
+		}).Info("DB Connection Pool Metrics")
+
+		prev = curr
 	}
 }
 
