@@ -1,9 +1,21 @@
 # go-connect
 
+<a name="v1.32.1"></a>
+## [v1.32.1] - 2026-08-28
+### Fixes
+- resolve vulnerabilities from grpc and echo
+
+
+<a name="v1.32.0"></a>
+## [v1.32.0] - 2026-08-27
+### Other Improvements
+- log db pool metrics ([#55](https://github.com/kumparan/go-connect/issues/55))
+
+
 <a name="v1.31.0"></a>
 ## [v1.31.0] - 2026-08-06
 ### New Features
-- add echo http request logger middleware
+- add echo http request logger middleware ([#54](https://github.com/kumparan/go-connect/issues/54))
 
 
 <a name="v1.30.1"></a>
@@ -327,7 +339,9 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.31.0...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.32.1...HEAD
+[v1.32.1]: https://github.com/kumparan/go-connect/compare/v1.32.0...v1.32.1
+[v1.32.0]: https://github.com/kumparan/go-connect/compare/v1.31.0...v1.32.0
 [v1.31.0]: https://github.com/kumparan/go-connect/compare/v1.30.1...v1.31.0
 [v1.30.1]: https://github.com/kumparan/go-connect/compare/v1.30.0...v1.30.1
 [v1.30.0]: https://github.com/kumparan/go-connect/compare/v1.29.0...v1.30.0
