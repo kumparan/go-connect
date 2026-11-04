@@ -1,9 +1,15 @@
 # go-connect
 
+<a name="v1.33.0"></a>
+## [v1.33.0] - 2026-11-04
+### Other Improvements
+- upgrade echo v4.16.3 & opentelemetry v1.47.0
+
+
 <a name="v1.32.1"></a>
 ## [v1.32.1] - 2026-08-28
 ### Fixes
-- resolve vulnerabilities from grpc and echo
+- resolve vulnerabilities from grpc and echo ([#56](https://github.com/kumparan/go-connect/issues/56))
 
 
 <a name="v1.32.0"></a>
@@ -339,7 +345,8 @@
 - init go-connect with http and redis connector ([#1](https://github.com/kumparan/go-connect/issues/1))
 
 
-[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.32.1...HEAD
+[Unreleased]: https://github.com/kumparan/go-connect/compare/v1.33.0...HEAD
+[v1.33.0]: https://github.com/kumparan/go-connect/compare/v1.32.1...v1.33.0
 [v1.32.1]: https://github.com/kumparan/go-connect/compare/v1.32.0...v1.32.1
 [v1.32.0]: https://github.com/kumparan/go-connect/compare/v1.31.0...v1.32.0
 [v1.31.0]: https://github.com/kumparan/go-connect/compare/v1.30.1...v1.31.0
